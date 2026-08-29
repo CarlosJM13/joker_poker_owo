@@ -1,18 +1,18 @@
 public class NodoCola {
-    private Carta carta;
+    private String jugador;
     private NodoCola siguiente;
 
-    public NodoCola(Carta carta) {
-        this.carta = carta;
+    public NodoCola(String jugador) {
+        this.jugador = jugador;
         this.siguiente = null;
     }
 
-    public Carta getCarta() {
-        return carta;
+    public String getJugador() {
+        return jugador;
     }
 
-    public void setCarta(Carta carta) {
-        this.carta = carta;
+    public void setJugador(String jugador) {
+        this.jugador = jugador;
     }
 
     public NodoCola getSiguiente() {

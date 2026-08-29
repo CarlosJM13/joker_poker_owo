@@ -9,9 +9,9 @@ public class Cola {
         this.tamano = 0;
     }
 
-    // Agrega una carta al final de la cola (por ejemplo, al armar/barajar el mazo)
-    public void encolar(Carta carta) {
-        NodoCola nuevoNodo = new NodoCola(carta);
+    // Agrega un jugador a la fila
+    public void encolar(String jugador) {
+        NodoCola nuevoNodo = new NodoCola(jugador);
         if (estaVacia()) {
             frente = nuevoNodo;
             ultimo = nuevoNodo;
@@ -22,45 +22,31 @@ public class Cola {
         tamano++;
     }
 
-    // Saca y devuelve la carta que esta al frente (la siguiente en repartirse)
-    public Carta desencolar() {
+    // Saca al jugador que le toca jugar
+    public String desencolar() {
         if (estaVacia()) {
-            System.out.println("La cola esta vacia, no hay cartas para repartir.");
+            System.out.println("No hay jugadores en la cola.");
             return null;
         }
-        Carta cartaSalida = frente.getCarta();
+        String turnoActual = frente.getJugador();
         frente = frente.getSiguiente();
         if (frente == null) {
             ultimo = null;
         }
         tamano--;
-        return cartaSalida;
+        return turnoActual;
     }
 
-    // Permite ver la carta del frente sin sacarla todavia de la cola
-    public Carta verFrente() {
-        if (estaVacia()) {
-            return null;
+    // Pasa el turno al siguiente jugador (lo saca del frente y lo forma atrás)
+    public String pasarTurno() {
+        String jugadorActual = desencolar();
+        if (jugadorActual != null) {
+            encolar(jugadorActual);
         }
-        return frente.getCarta();
+        return jugadorActual;
     }
 
     public boolean estaVacia() {
         return frente == null;
-    }
-
-    public int getTamano() {
-        return tamano;
-    }
-
-    // Metodo extra util para depurar: muestra todas las cartas que quedan
-    public void mostrarCola() {
-        NodoCola actual = frente;
-        System.out.print("Cola actual: ");
-        while (actual != null) {
-            System.out.print("[" + actual.getCarta() + "] ");
-            actual = actual.getSiguiente();
-        }
-        System.out.println();
     }
 }
