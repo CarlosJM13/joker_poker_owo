@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -9,19 +6,22 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Random random = new Random();
 
-        // Creamos las estructuras para los turnos, pilas de descarte y el historial
+        // Estructuras de datos para el juego
         Cola turnos = new Cola();
-        Pila pilaJugador1 = new Pila();
-        Pila pilaJugador2 = new Pila();
-        ListaCircular debuffos = new ListaCircular();
+        Pila pilaDescartesParaJ2 = new Pila();
+        Pila pilaDescartesParaJ1 = new Pila();
+        ListaCircular efectos = new ListaCircular();
         ListaDoble historial = new ListaDoble();
         Revisar motorPoker = new Revisar();
 
-        // Efectos que cambian los puntos de las manos cada ronda
-        debuffos.agregar("El Full House vale la mitad de puntos");
-        debuffos.agregar("Las Escaleras dan el doble de puntos");
-        debuffos.agregar("Los Pares valen la mitad de puntos");
-        debuffos.agregar("Sin debuffo esta ronda (Puntaje normal)");
+        ListaSimple mazoJugador1 = new ListaSimple();
+        ListaSimple mazoJugador2 = new ListaSimple();
+
+        // Efectos de ronda
+        efectos.agregar("El Full House vale la mitad de puntos");
+        efectos.agregar("Las Escaleras dan el doble de puntos");
+        efectos.agregar("Los Pares valen la mitad de puntos");
+        efectos.agregar("Sin debuffo esta ronda");
 
         String jugador1 = "";
         String jugador2 = "";
@@ -34,11 +34,13 @@ public class Main {
         while (!salir) {
             limpiarConsola();
             System.out.println("========================================");
-            System.out.println("     MENÚ PRINCIPAL - JOKER POKER       ");
+            System.out.println("             JOKER POKER                ");
             System.out.println("========================================");
-            System.out.println("1. Jugar una nueva partida");
-            System.out.println("2. Ver historial de partidas (Lista Doble)");
-            System.out.println("3. Salir del programa");
+            System.out.println("1. Registrar Jugadores y Jugar");
+            System.out.println("2. Ver historial hacia adelante");
+            System.out.println("3. Ver historial hacia atrás");
+            System.out.println("4. Salir del programa");
+            System.out.println("----------------------------------------");
             System.out.print("Elige una opción: ");
 
             int opcion = scanner.nextInt();
@@ -46,244 +48,248 @@ public class Main {
 
             switch (opcion) {
                 case 1:
-                    // Pedimos los nombres de los jugadores la primera vez
+                    // Pedir nombres si es la primera vez que se juega
                     if (!jugadoresRegistrados) {
                         limpiarConsola();
-                        System.out.print("Ingresa el nombre del Jugador 1: ");
+                        System.out.println("=== REGISTRO DE JUGADORES ===");
+                        System.out.print("Nombre del Jugador 1: ");
                         jugador1 = scanner.nextLine();
-                        System.out.print("Ingresa el nombre del Jugador 2: ");
+                        System.out.print("Nombre del Jugador 2: ");
                         jugador2 = scanner.nextLine();
                         jugadoresRegistrados = true;
-                        historial.agregar("Se registraron los jugadores: " + jugador1 + " y " + jugador2);
+
+                        turnos.encolar(jugador1);
+                        turnos.encolar(jugador2);
                     }
 
                     limpiarConsola();
-                    System.out.println("=== ¡INICIANDO PARTIDA TIPO BALATRO! ===");
+                    System.out.println("Barajando y repartiendo cartas...");
 
-                    // Baraja de 52 cartas revuelta para que no salgan repetidas
-                    List<Carta> barajaActual = inicializarBaraja(random, palos, nombresCartas);
+                    Carta[] mazoCentral = inicializarBaraja(random, palos, nombresCartas);
+                    int indexMazo = 0;
 
-                    turnos.encolar(jugador1);
-                    turnos.encolar(jugador2);
+                    // Repartir 3 cartas a cada jugador
+                    mazoJugador1.vaciar();
+                    mazoJugador1.agregarCarta(mazoCentral[indexMazo++]);
+                    mazoJugador1.agregarCarta(mazoCentral[indexMazo++]);
+                    mazoJugador1.agregarCarta(mazoCentral[indexMazo++]);
 
-                    // Repartimos 3 cartas iniciales para cada uno desde el mazo
-                    Carta m1_c1 = barajaActual.remove(0);
-                    Carta m1_c2 = barajaActual.remove(0);
-                    Carta m1_c3 = barajaActual.remove(0);
+                    mazoJugador2.vaciar();
+                    mazoJugador2.agregarCarta(mazoCentral[indexMazo++]);
+                    mazoJugador2.agregarCarta(mazoCentral[indexMazo++]);
+                    mazoJugador2.agregarCarta(mazoCentral[indexMazo++]);
 
-                    Carta m2_c1 = barajaActual.remove(0);
-                    Carta m2_c2 = barajaActual.remove(0);
-                    Carta m2_c3 = barajaActual.remove(0);
+                    System.out.println("Cartas listas en mano (" + mazoJugador1.getTamaño() + " repartidas a cada uno).");
 
-                    // --- Turno Jugador 1: Elige de su mazo principal ---
+                    // --- SELECCION INICIAL J1 ---
                     limpiarConsola();
-                    String turnoActual = turnos.desencolar();
-                    System.out.println("--- Turno de " + turnoActual + " (Mazo Principal) ---");
-                    System.out.println("1. " + m1_c1);
-                    System.out.println("2. " + m1_c2);
-                    System.out.println("3. " + m1_c3);
-                    System.out.print("Elige una carta (1, 2 o 3): ");
+                    String turnoActual = turnos.pasarTurno();
+                    System.out.println("========================================");
+                    System.out.println("Turno de: " + turnoActual);
+                    System.out.println("========================================");
+                    System.out.println("Tus cartas disponibles:");
+                    mazoJugador1.mostrarCatalogo();
+                    System.out.println("----------------------------------------");
+                    System.out.print("Selecciona la carta que conservas (1, 2 o 3): ");
                     int opJ1 = scanner.nextInt();
                     scanner.nextLine();
 
-                    Carta cartaElegidaJ1 = (opJ1 == 1) ? m1_c1 : (opJ1 == 2 ? m1_c2 : m1_c3);
+                    Carta cartaElegidaJ1 = mazoJugador1.obtenerCarta(opJ1);
+                    for (int i = 1; i <= 3; i++) {
+                        if (i != opJ1) pilaDescartesParaJ2.apilar(mazoJugador1.obtenerCarta(i));
+                    }
 
-                    // Las cartas que no eligió se van a la pila del rival
-                    if (opJ1 != 1) pilaJugador2.apilar(m1_c1);
-                    if (opJ1 != 2) pilaJugador2.apilar(m1_c2);
-                    if (opJ1 != 3) pilaJugador2.apilar(m1_c3);
-
-                    turnos.encolar(turnoActual);
-
-                    // --- Turno Jugador 2: Elige de su mazo principal ---
+                    // --- SELECCION INICIAL J2 ---
                     limpiarConsola();
-                    turnoActual = turnos.desencolar();
-                    System.out.println("--- Turno de " + turnoActual + " (Mazo Principal) ---");
-                    System.out.println("1. " + m2_c1);
-                    System.out.println("2. " + m2_c2);
-                    System.out.println("3. " + m2_c3);
-                    System.out.print("Elige una carta (1, 2 o 3): ");
+                    turnoActual = turnos.pasarTurno();
+                    System.out.println("========================================");
+                    System.out.println("Turno de: " + turnoActual);
+                    System.out.println("========================================");
+                    System.out.println("Tus cartas disponibles:");
+                    mazoJugador2.mostrarCatalogo();
+                    System.out.println("----------------------------------------");
+                    System.out.print("Selecciona la carta que conservas (1, 2 o 3): ");
                     int opJ2 = scanner.nextInt();
                     scanner.nextLine();
 
-                    Carta cartaElegidaJ2 = (opJ2 == 1) ? m2_c1 : (opJ2 == 2 ? m2_c2 : m2_c3);
+                    Carta cartaElegidaJ2 = mazoJugador2.obtenerCarta(opJ2);
+                    for (int i = 1; i <= 3; i++) {
+                        if (i != opJ2) pilaDescartesParaJ1.apilar(mazoJugador2.obtenerCarta(i));
+                    }
 
-                    // Las que no eligió se van a la pila del Jugador 1
-                    if (opJ2 != 1) pilaJugador1.apilar(m2_c1);
-                    if (opJ2 != 2) pilaJugador1.apilar(m2_c2);
-                    if (opJ2 != 3) pilaJugador1.apilar(m2_c3);
-
-                    turnos.encolar(turnoActual);
-
-                    // --- Anunciamos el efecto y sacamos las primeras 3 cartas comunitarias ---
+                    // --- REVELAR CARTAS COMUNITARIAS ---
                     limpiarConsola();
-                    String efectoRonda = debuffos.avanzarEfecto();
-                    System.out.println("[LISTA CIRCULAR] Efecto de mano para esta ronda: " + efectoRonda);
+                    String efectoRonda = efectos.avanzarEfecto();
+                    System.out.println("========================================");
+                    System.out.println("Efecto activo: " + efectoRonda);
+                    System.out.println("========================================");
 
-                    System.out.println("\n[MESA COMÚN] Primeras 3 cartas comunitarias:");
+                    System.out.println("Cartas comunitarias destapadas:");
                     Carta[] centro = new Carta[5];
-                    centro[0] = barajaActual.remove(0);
-                    centro[1] = barajaActual.remove(0);
-                    centro[2] = barajaActual.remove(0);
+                    for(int i = 0; i < 3; i++) {
+                        centro[i] = mazoCentral[indexMazo++];
+                        centro[i].setComunitaria(true);
+                        System.out.println("  [" + (i+1) + "] " + centro[i]);
+                    }
 
-                    mostrarMesaParcial(centro, 3);
-
-                    // --- Turno J1: Escoge entre descartes del rival o una carta random del mazo ---
-                    System.out.println("\nPresiona ENTER para continuar con el turno de " + jugador1 + "...");
+                    System.out.println("\nPresiona ENTER para ir a la fase de descartes...");
                     scanner.nextLine();
+
+                    // --- DESCARTES J1 ---
                     limpiarConsola();
+                    turnoActual = turnos.pasarTurno();
+                    System.out.println("========================================");
+                    System.out.println("Turno de: " + turnoActual);
+                    System.out.println("Cartas disponibles para tomar:");
+                    System.out.println("----------------------------------------");
 
-                    turnoActual = turnos.desencolar();
-                    System.out.println("--- Turno de " + turnoActual + " (Descartes + Extra Random) ---");
-                    mostrarMesaParcial(centro, 3);
+                    Carta d1_j1 = pilaDescartesParaJ1.desapilar();
+                    Carta d2_j1 = pilaDescartesParaJ1.desapilar();
+                    Carta extraMazo_j1 = mazoCentral[indexMazo++]; // Siguiente carta del mazo
 
-                    Carta d1_j2 = pilaJugador1.desapilar();
-                    Carta d2_j2 = pilaJugador1.desapilar();
-                    Carta cartaRandomJ1 = barajaActual.remove(0); // Sacamos una carta limpia del mazo
-
-                    System.out.println("\nOpciones disponibles:");
-                    System.out.println("1. " + d1_j2 + " (Reciclada del rival)");
-                    System.out.println("2. " + d2_j2 + " (Reciclada del rival)");
-                    System.out.println("3. " + cartaRandomJ1 + " (Carta Extra de la Baraja)");
-                    System.out.print("Elige tu carta definitiva (1, 2 o 3): ");
-                    int selDescJ1 = scanner.nextInt();
+                    System.out.println("1. " + d1_j1 + " (Pila descartes rival)");
+                    System.out.println("2. " + d2_j1 + " (Pila descartes rival)");
+                    System.out.println("3. " + extraMazo_j1 + " (Mazo Central)");
+                    System.out.println("----------------------------------------");
+                    System.out.print("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ");
+                    int descJ1 = scanner.nextInt();
                     scanner.nextLine();
 
-                    Carta cartaDescarteJ1 = (selDescJ1 == 1) ? d1_j2 : (selDescJ1 == 2 ? d2_j2 : cartaRandomJ1);
-                    turnos.encolar(turnoActual);
+                    Carta cartaDescarteJ1 = (descJ1 == 1) ? d1_j1 : (descJ1 == 2) ? d2_j1 : extraMazo_j1;
 
-                    // --- Turno J2: Escoge entre descartes del rival o una carta random del mazo ---
-                    System.out.println("\nPresiona ENTER para continuar con el turno de " + jugador2 + "...");
-                    scanner.nextLine();
+                    // --- DESCARTES J2 ---
                     limpiarConsola();
+                    turnoActual = turnos.pasarTurno();
+                    System.out.println("========================================");
+                    System.out.println("Turno de: " + turnoActual);
+                    System.out.println("Cartas disponibles para tomar:");
+                    System.out.println("----------------------------------------");
 
-                    turnoActual = turnos.desencolar();
-                    System.out.println("--- Turno de " + turnoActual + " (Descartes + Extra Random) ---");
-                    mostrarMesaParcial(centro, 3);
+                    Carta d1_j2 = pilaDescartesParaJ2.desapilar();
+                    Carta d2_j2 = pilaDescartesParaJ2.desapilar();
+                    Carta extraMazo_j2 = mazoCentral[indexMazo++]; // Siguiente carta del mazo
 
-                    Carta d1_j1 = pilaJugador2.desapilar();
-                    Carta d2_j1 = pilaJugador2.desapilar();
-                    Carta cartaRandomJ2 = barajaActual.remove(0); // Sacamos otra carta limpia
-
-                    System.out.println("\nOpciones disponibles:");
-                    System.out.println("1. " + d1_j1 + " (Reciclada del rival)");
-                    System.out.println("2. " + d2_j1 + " (Reciclada del rival)");
-                    System.out.println("3. " + cartaRandomJ2 + " (Carta Extra de la Baraja)");
-                    System.out.print("Elige tu carta definitiva (1, 2 o 3): ");
-                    int selDescJ2 = scanner.nextInt();
+                    System.out.println("1. " + d1_j2 + " (Pila descartes rival)");
+                    System.out.println("2. " + d2_j2 + " (Pila descartes rival)");
+                    System.out.println("3. " + extraMazo_j2 + " (Mazo Central)");
+                    System.out.println("----------------------------------------");
+                    System.out.print("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ");
+                    int descJ2 = scanner.nextInt();
                     scanner.nextLine();
 
-                    Carta cartaDescarteJ2 = (selDescJ2 == 1) ? d1_j1 : (selDescJ2 == 2 ? d2_j1 : cartaRandomJ2);
-                    turnos.encolar(turnoActual);
+                    Carta cartaDescarteJ2 = (descJ2 == 1) ? d1_j2 : (descJ2 == 2) ? d2_j2 : extraMazo_j2;
 
-                    // --- Destapamos las últimas 2 cartas comunitarias para completar las 5 ---
+                    // --- EVALUAR MANOS Y SACAR GANADOR ---
                     limpiarConsola();
-                    System.out.println("[MESA COMÚN] Se revelan las 5 cartas comunitarias completas:");
-                    centro[3] = barajaActual.remove(0);
-                    centro[4] = barajaActual.remove(0);
-                    mostrarMesaParcial(centro, 5);
+                    centro[3] = mazoCentral[indexMazo++]; centro[3].setComunitaria(true);
+                    centro[4] = mazoCentral[indexMazo++]; centro[4].setComunitaria(true);
 
-                    Carta[] manoJugador1 = new Carta[] { cartaElegidaJ1, cartaDescarteJ1 };
-                    Carta[] manoJugador2 = new Carta[] { cartaElegidaJ2, cartaDescarteJ2 };
-
-                    Carta[][] todosLosJugadores = new Carta[][] { manoJugador1, manoJugador2 };
+                    Carta[] manoJugador1 = { cartaElegidaJ1, cartaDescarteJ1 };
+                    Carta[] manoJugador2 = { cartaElegidaJ2, cartaDescarteJ2 };
+                    Carta[][] todosLosJugadores = { manoJugador1, manoJugador2 };
 
                     int indiceGanador = motorPoker.determinarGanador(centro, todosLosJugadores);
                     String ganadorPartida = (indiceGanador == 0) ? jugador1 : jugador2;
-
                     Resultado resJ1 = motorPoker.evaluar(centro, manoJugador1);
                     Resultado resJ2 = motorPoker.evaluar(centro, manoJugador2);
 
-                    // Preparamos las cartas específicas que eligió el ganador para guardarlas
-                    Carta cartaElegidaGanador1 = (indiceGanador == 0) ? cartaElegidaJ1 : cartaElegidaJ2;
-                    Carta cartaElegidaGanador2 = (indiceGanador == 0) ? cartaDescarteJ1 : cartaDescarteJ2;
-                    String manoGanadoraNombre = (indiceGanador == 0) ? resJ1.getNombreMano() : resJ2.getNombreMano();
+                    System.out.println("========================================");
+                    System.out.println("           RESULTADOS FINALES           ");
+                    System.out.println("========================================");
+                    System.out.println("CARTAS EN LA MESA:");
+                    for (int i = 0; i < centro.length; i++) {
+                        System.out.println("  " + (i + 1) + ". " + centro[i]);
+                    }
+                    System.out.println("----------------------------------------");
+                    System.out.println("Mano de " + jugador1 + ":");
+                    System.out.println("  Cartas usadas: [" + cartaElegidaJ1 + "] y [" + cartaDescarteJ1 + "]");
+                    System.out.println("  Jugada armada: " + resJ1.getNombreMano());
+                    System.out.println("----------------------------------------");
+                    System.out.println("Mano de " + jugador2 + ":");
+                    System.out.println("  Cartas usadas: [" + cartaElegidaJ2 + "] y [" + cartaDescarteJ2 + "]");
+                    System.out.println("  Jugada armada: " + resJ2.getNombreMano());
+                    System.out.println("========================================");
+                    System.out.println("¡GANADOR DE LA RONDA: " + ganadorPartida.toUpperCase() + "!");
+                    System.out.println("========================================");
 
-                    // Guardamos en el historial solo las 5 de la mesa y las 2 del ganador
+                    // Guardar registro en el historial
                     String detalleHistorial = "Ganador: " + ganadorPartida +
-                            " | Mano: " + manoGanadoraNombre +
-                            " | Sus cartas: [" + cartaElegidaGanador1 + ", " + cartaElegidaGanador2 + "]" +
-                            " | Comunitarias: [" + centro[0] + ", " + centro[1] + ", " + centro[2] + ", " + centro[3] + ", " + centro[4] + "]";
+                            " | " + jugador1 + ": [" + cartaElegidaJ1 + ", " + cartaDescarteJ1 + "] -> " + resJ1.getNombreMano() +
+                            " vs " + jugador2 + ": [" + cartaElegidaJ2 + ", " + cartaDescarteJ2 + "] -> " + resJ2.getNombreMano();
 
                     historial.agregar(detalleHistorial);
 
-                    System.out.println("\n========================================");
-                    System.out.println("       RESULTADOS FINALES DE LA RONDA    ");
-                    System.out.println("========================================");
-                    System.out.println("Efecto aplicado: " + efectoRonda);
-                    System.out.println("----------------------------------------");
-                    System.out.println(jugador1 + " escogió: [" + cartaElegidaJ1 + "] y [" + cartaDescarteJ1 + "]");
-                    System.out.println(jugador1 + " armó: " + resJ1.getNombreMano());
-                    System.out.println("----------------------------------------");
-                    System.out.println(jugador2 + " escogió: [" + cartaElegidaJ2 + "] y [" + cartaDescarteJ2 + "]");
-                    System.out.println(jugador2 + " armó: " + resJ2.getNombreMano());
-                    System.out.println("----------------------------------------");
-                    System.out.println(">>> ¡EL GANADOR ES: " + ganadorPartida.toUpperCase() + " ! <<<");
-                    System.out.println("========================================");
-
-                    System.out.println("\nPresiona ENTER para regresar al Menú Principal...");
+                    System.out.println("\nPresiona ENTER para regresar al menú...");
                     scanner.nextLine();
                     break;
 
                 case 2:
                     limpiarConsola();
-                    System.out.println("--- HISTORIAL DE PARTIDAS (Lista Doble Adelante) ---");
+                    System.out.println("=== HISTORIAL DE PARTIDAS (ORDEN CRONOLÓGICO) ===");
                     historial.mostrarAdelante();
-                    System.out.println("\n--- HISTORIAL EN REVERSA (Lista Doble Atrás) ---");
-                    historial.mostrarAtras();
                     System.out.println("\nPresiona ENTER para regresar...");
                     scanner.nextLine();
                     break;
 
                 case 3:
+                    limpiarConsola();
+                    System.out.println("=== HISTORIAL DE PARTIDAS (MÁS RECIENTES PRIMERO) ===");
+                    historial.mostrarAtras();
+                    System.out.println("\nPresiona ENTER para regresar...");
+                    scanner.nextLine();
+                    break;
+
+                case 4:
                     salir = true;
-                    System.out.println("Saliendo del programa. ¡Mucho éxito con el proyecto!");
+                    System.out.println("Saliendo del juego...");
                     break;
 
                 default:
-                    System.out.println("Opción inválida.");
+                    System.out.println("Opción no válida.");
             }
         }
         scanner.close();
     }
 
-    // Armamos la baraja de 52 cartas y la revolvemos para que no se repitan
-    private static List<Carta> inicializarBaraja(Random random, String[] palos, String[] nombres) {
-        List<Carta> baraja = new ArrayList<>();
+    // Inicializa la baraja de 52 cartas y la revuelve
+    private static Carta[] inicializarBaraja(Random random, String[] palos, String[] nombres) {
+        Carta[] tempBaraja = new Carta[52];
+        int cont = 0;
+
         for (String palo : palos) {
             for (String nombre : nombres) {
                 int valorNumerico = 2;
-                if (nombre.equalsIgnoreCase("As")) {
-                    valorNumerico = 11;
-                } else if (nombre.equalsIgnoreCase("K") || nombre.equalsIgnoreCase("Q") || nombre.equalsIgnoreCase("J")) {
-                    valorNumerico = 10;
-                } else {
-                    try {
-                        valorNumerico = Integer.parseInt(nombre);
-                    } catch (NumberFormatException e) {
-                        valorNumerico = 2;
-                    }
+                if (nombre.equalsIgnoreCase("As")) valorNumerico = 14;
+                else if (nombre.equalsIgnoreCase("K")) valorNumerico = 13;
+                else if (nombre.equalsIgnoreCase("Q")) valorNumerico = 12;
+                else if (nombre.equalsIgnoreCase("J")) valorNumerico = 11;
+                else {
+                    try { valorNumerico = Integer.parseInt(nombre); }
+                    catch (NumberFormatException e) { valorNumerico = 2; }
                 }
-                baraja.add(new Carta(nombre, palo, valorNumerico, false));
+
+                Carta c = new Carta(nombre, palo, valorNumerico, false);
+                c.setNombre(nombre);
+                c.setPalo(palo);
+                c.setValorNumerico(valorNumerico);
+
+                tempBaraja[cont] = c;
+                cont++;
             }
         }
-        Collections.shuffle(baraja, random);
-        return baraja;
+
+        // Algoritmo para revolver el mazo
+        for (int i = tempBaraja.length - 1; i > 0; i--) {
+            int index = random.nextInt(i + 1);
+            Carta a = tempBaraja[index];
+            tempBaraja[index] = tempBaraja[i];
+            tempBaraja[i] = a;
+        }
+        return tempBaraja;
     }
 
-    // Ponemos muchos saltos de línea para limpiar la pantalla y que no se vea el turno pasado
+    // Salto de lineas para limpiar la pantalla de la consola
     private static void limpiarConsola() {
-        for (int i = 0; i < 40; i++) {
-            System.out.println();
-        }
-    }
-
-    // Imprimimos las cartas que van saliendo en la mesa para tenerlas a la vista
-    private static void mostrarMesaParcial(Carta[] centro, int cantidad) {
-        System.out.println("----------------------------------------");
-        for (int i = 0; i < cantidad; i++) {
-            System.out.println("  [Mesa] Carta " + (i + 1) + ": " + centro[i]);
-        }
-        System.out.println("----------------------------------------");
+        for (int i = 0; i < 35; i++) System.out.println();
     }
 }

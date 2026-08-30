@@ -24,11 +24,33 @@ public class ListaSimple {
 
     public void mostrarCatalogo() {
         NodoSimple actual = cabeza;
+        int contador = 1;
         while (actual != null) {
-            System.out.println(actual.getCarta().toString());
+            System.out.println(contador + ". " + actual.getCarta().toString());
             actual = actual.getSiguiente();
+            contador++;
         }
     }
 
     public int getTamaño() { return tamaño; }
+
+    // Obtiene una carta específica según su posición (1, 2 o 3)
+    public Carta obtenerCarta(int indice) {
+        NodoSimple actual = cabeza;
+        int contador = 1;
+        while (actual != null) {
+            if (contador == indice) {
+                return actual.getCarta();
+            }
+            actual = actual.getSiguiente();
+            contador++;
+        }
+        return null;
+    }
+
+    // Vacía la lista para la siguiente ronda
+    public void vaciar() {
+        this.cabeza = null;
+        this.tamaño = 0;
+    }
 }
