@@ -43,8 +43,8 @@ public class Main {
             System.out.println("----------------------------------------");
             System.out.print("Elige una opción: ");
 
-            int opcion = scanner.nextInt();
-            scanner.nextLine();
+            // este es el nuevo metodo para evitar errores con la clase validador aqui para las opciones principales (1)
+            int opcion = Validador.pedirOpcion("Elige una opción (1-4): ", 1, 4);
 
             switch (opcion) {
                 case 1:
@@ -91,8 +91,9 @@ public class Main {
                     mazoJugador1.mostrarCatalogo();
                     System.out.println("----------------------------------------");
                     System.out.print("Selecciona la carta que conservas (1, 2 o 3): ");
-                    int opJ1 = scanner.nextInt();
-                    scanner.nextLine();
+
+                    // este es el nuevo metodo para evitar errores con la clase validador aqui jugador 1 (2)
+                    int opJ1 = Validador.pedirOpcion("Selecciona la carta que conservas (1, 2 o 3): ", 1, 3);
 
                     Carta cartaElegidaJ1 = mazoJugador1.obtenerCarta(opJ1);
                     for (int i = 1; i <= 3; i++) {
@@ -109,8 +110,9 @@ public class Main {
                     mazoJugador2.mostrarCatalogo();
                     System.out.println("----------------------------------------");
                     System.out.print("Selecciona la carta que conservas (1, 2 o 3): ");
-                    int opJ2 = scanner.nextInt();
-                    scanner.nextLine();
+
+                    // este es el nuevo metodo para evitar errores con la clase validador en este caso jugador 2 (3)
+                    int opJ2 = Validador.pedirOpcion("Selecciona la carta que conservas (1, 2 o 3): ", 1, 3);
 
                     Carta cartaElegidaJ2 = mazoJugador2.obtenerCarta(opJ2);
                     for (int i = 1; i <= 3; i++) {
@@ -152,8 +154,9 @@ public class Main {
                     System.out.println("3. " + extraMazo_j1 + " (Mazo Central)");
                     System.out.println("----------------------------------------");
                     System.out.print("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ");
-                    int descJ1 = scanner.nextInt();
-                    scanner.nextLine();
+
+                    // este es el nuevo metodo para evitar errores con la clase validador, en este caso descartes (4)
+                    int descJ1 = Validador.pedirOpcion("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ", 1, 3);
 
                     Carta cartaDescarteJ1 = (descJ1 == 1) ? d1_j1 : (descJ1 == 2) ? d2_j1 : extraMazo_j1;
 
@@ -174,8 +177,9 @@ public class Main {
                     System.out.println("3. " + extraMazo_j2 + " (Mazo Central)");
                     System.out.println("----------------------------------------");
                     System.out.print("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ");
-                    int descJ2 = scanner.nextInt();
-                    scanner.nextLine();
+
+                    // este es el nuevo metodo para evitar errores con la clase validador en este caso descartes del p2 (5)
+                    int descJ2 = Validador.pedirOpcion("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ", 1, 3);
 
                     Carta cartaDescarteJ2 = (descJ2 == 1) ? d1_j2 : (descJ2 == 2) ? d2_j2 : extraMazo_j2;
 
@@ -264,8 +268,8 @@ public class Main {
                 else if (nombre.equalsIgnoreCase("Q")) valorNumerico = 12;
                 else if (nombre.equalsIgnoreCase("J")) valorNumerico = 11;
                 else {
-                    try { valorNumerico = Integer.parseInt(nombre); }
-                    catch (NumberFormatException e) { valorNumerico = 2; }
+                    // aqui estaba el try catch anterior que no servia de nada y fue remplazado por este
+                    valorNumerico = Integer.parseInt(nombre);
                 }
 
                 Carta c = new Carta(nombre, palo, valorNumerico, false);
