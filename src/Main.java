@@ -17,7 +17,7 @@ public class Main {
         ListaSimple mazoJugador1 = new ListaSimple();
         ListaSimple mazoJugador2 = new ListaSimple();
 
-        // import para el arbol de mejoras
+        // Inicialización del árbol de mejoras
         ArbolMejoras arbolMejoras = new ArbolMejoras();
         arbolMejoras.inicializarRutas();
 
@@ -98,7 +98,7 @@ public class Main {
                         if (i != opJ1) pilaDescartesParaJ2.apilar(mazoJugador1.obtenerCarta(i));
                     }
 
-                    // -evolucion
+                    // --- EVOLUCIÓN J1 ---
                     System.out.println("\n--- EVOLUCIÓN DE CARTA ---");
                     cartaElegidaJ1.setNivelEvolucion(arbolMejoras.raiz);
                     System.out.println("Rutas disponibles:");
@@ -114,7 +114,6 @@ public class Main {
                     System.out.println("Tu carta ha evolucionado a: " + cartaElegidaJ1.nivelActual.nivelEvolucion);
                     System.out.println("Presiona ENTER para continuar...");
                     scanner.nextLine();
-                    // ---------------------------
 
                     // --- SELECCION INICIAL J2 ---
                     limpiarConsola();
@@ -133,7 +132,7 @@ public class Main {
                         if (i != opJ2) pilaDescartesParaJ1.apilar(mazoJugador2.obtenerCarta(i));
                     }
 
-                    // evolucion jugador 2
+                    // --- EVOLUCIÓN J2 ---
                     System.out.println("\n--- EVOLUCIÓN DE CARTA ---");
                     cartaElegidaJ2.setNivelEvolucion(arbolMejoras.raiz);
                     System.out.println("Rutas disponibles:");
@@ -149,7 +148,6 @@ public class Main {
                     System.out.println("Tu carta ha evolucionado a: " + cartaElegidaJ2.nivelActual.nivelEvolucion);
                     System.out.println("Presiona ENTER para continuar...");
                     scanner.nextLine();
-                    // ---------------------------
 
                     // --- REVELAR CARTAS COMUNITARIAS ---
                     limpiarConsola();
@@ -209,7 +207,7 @@ public class Main {
                     int descJ2 = Validador.pedirOpcion("Elige la carta que quieres sumar a tu mano (1, 2 o 3): ", 1, 3);
                     Carta cartaDescarteJ2 = (descJ2 == 1) ? d1_j2 : (descJ2 == 2) ? d2_j2 : extraMazo_j2;
 
-                    // EVALUAR MANOS Y SACAR GANADOR
+                    // --- EVALUAR MANOS Y SACAR GANADOR ---
                     limpiarConsola();
                     centro[3] = mazoCentral[indexMazo++]; centro[3].setComunitaria(true);
                     centro[4] = mazoCentral[indexMazo++]; centro[4].setComunitaria(true);
@@ -232,24 +230,32 @@ public class Main {
                     }
                     System.out.println("----------------------------------------");
                     System.out.println("Mano de " + jugador1 + ":");
-                    // Mostrar el nivel alcanzado en los resultados
                     System.out.println("  Cartas usadas: [" + cartaElegidaJ1 + " (" + cartaElegidaJ1.nivelActual.nivelEvolucion + ")] y [" + cartaDescarteJ1 + "]");
                     System.out.println("  Jugada armada: " + resJ1.getNombreMano());
                     System.out.println("----------------------------------------");
                     System.out.println("Mano de " + jugador2 + ":");
-                    // Mostrar el nivel alcanzado en los resultados
                     System.out.println("  Cartas usadas: [" + cartaElegidaJ2 + " (" + cartaElegidaJ2.nivelActual.nivelEvolucion + ")] y [" + cartaDescarteJ2 + "]");
                     System.out.println("  Jugada armada: " + resJ2.getNombreMano());
                     System.out.println("========================================");
                     System.out.println("¡GANADOR DE LA RONDA: " + ganadorPartida.toUpperCase() + "!");
                     System.out.println("========================================");
 
-                    // Guardar el nivel de evolución en el historial
-                    String detalleHistorial = "Ganador: " + ganadorPartida +
-                            " | " + jugador1 + ": [" + cartaElegidaJ1.getNombre() + " (" + cartaElegidaJ1.nivelActual.nivelEvolucion + "), " + cartaDescarteJ1.getNombre() + "] -> " + resJ1.getNombreMano() +
-                            " vs " + jugador2 + ": [" + cartaElegidaJ2.getNombre() + " (" + cartaElegidaJ2.nivelActual.nivelEvolucion + "), " + cartaDescarteJ2.getNombre() + "] -> " + resJ2.getNombreMano();
+                    // Guardar en el historial con el nuevo formato de Lista Doble
+                    // Damos formato a las cartas mostrando el nivel de evolución de la principal
+                    String cartasFormatJ1 = "[" + cartaElegidaJ1.getNombre() + " de " + cartaElegidaJ1.getPalo() + " (" + cartaElegidaJ1.nivelActual.nivelEvolucion + ") y " + cartaDescarteJ1.getNombre() + " de " + cartaDescarteJ1.getPalo() + "]";
+                    String cartasFormatJ2 = "[" + cartaElegidaJ2.getNombre() + " de " + cartaElegidaJ2.getPalo() + " (" + cartaElegidaJ2.nivelActual.nivelEvolucion + ") y " + cartaDescarteJ2.getNombre() + " de " + cartaDescarteJ2.getPalo() + "]";
 
-                    historial.agregar(detalleHistorial);
+                    // Variables temporales para la ciega
+                    // cambiar para revisar
+                    int valorCiegaRonda = 1000;
+                    boolean superoCiega1 = (indiceGanador == 0); // Para este ejemplo, supera la ciega el que ganó la mano
+                    boolean superoCiega2 = (indiceGanador == 1);
+
+                    historial.agregar(
+                            jugador1, resJ1.getNombreMano(), cartasFormatJ1, superoCiega1,
+                            jugador2, resJ2.getNombreMano(), cartasFormatJ2, superoCiega2,
+                            valorCiegaRonda
+                    );
 
                     System.out.println("\nPresiona ENTER para regresar al menú...");
                     scanner.nextLine();
