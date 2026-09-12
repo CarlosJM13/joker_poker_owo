@@ -1,3 +1,4 @@
+/*
 public class Revisar {
     public Resultado evaluar(Carta[] centro, Carta[] cartasJugador) {
         Carta[] sieteCartas = new Carta[7];
@@ -298,3 +299,4 @@ public class Revisar {
         return ganador;
     }
 }
+ */
