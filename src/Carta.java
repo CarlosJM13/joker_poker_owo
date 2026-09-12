@@ -3,12 +3,21 @@ public class Carta {
     private String palo;
     private int valorNumerico;
     private boolean comunitaria;
+    private int fichaAzules;
+    private int multiRojo;
 
-    public Carta(String nombre, String palo, int valorNumerico, boolean comunitaria) {
+    //Fichas azules agregan fichas al puntaje.
+    //Multiplicadores rojos aumentan el multiplicador para consultar los multiplicadores
+    public int verfichazul(){return fichaAzules;}
+    public int vermultirojo(){return multiRojo;}
+
+    public Carta(String nombre, String palo, int valorNumerico, boolean comunitaria, int fichaAzules, int multiRojo) {
         this.nombre = nombre;
         this.palo = palo;
         this.valorNumerico = valorNumerico;
         this.comunitaria = comunitaria;
+        this.fichaAzules = fichaAzules;
+        this.multiRojo = multiRojo;
     }
 
     public String getNombre() { return nombre; }
