@@ -1,4 +1,4 @@
-public class Resultado {
+/*public class Resultado {
     private int puntos;
     private String nombreMano;
     private int[] desempate;
@@ -21,3 +21,4 @@ public class Resultado {
         return desempate;
     }
 }
+*/
