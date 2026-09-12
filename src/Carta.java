@@ -27,4 +27,12 @@ public class Carta {
     public String toString() {
         return nombre + " de " + palo + " (Valor: " + valorNumerico + ")";
     }
+
+    public boolean esRoja() {
+        return palo.equalsIgnoreCase("corazon") || palo.equalsIgnoreCase("diamante");
+    }
+
+    public boolean esNegra() {
+        return palo.equalsIgnoreCase("trebol") || palo.equalsIgnoreCase("pica");
+    }
 }
