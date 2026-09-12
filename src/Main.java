@@ -21,6 +21,12 @@ public class Main {
         ArbolMejoras arbolMejoras = new ArbolMejoras();
         arbolMejoras.inicializarRutas();
 
+        // --- LO NUEVO ---
+        TablaHash barajaExtra = new TablaHash(100);
+        Jugador j1 = new Jugador("");
+        Jugador j2 = new Jugador("");
+        // ----------------
+
         // Efectos de ronda
         efectos.agregar("El Full House vale la mitad de puntos");
         efectos.agregar("Las Escaleras dan el doble de puntos");
@@ -59,6 +65,11 @@ public class Main {
                         jugador2 = scanner.nextLine();
                         jugadoresRegistrados = true;
 
+                        // --- LO NUEVO ---
+                        j1.setNombre(jugador1);
+                        j2.setNombre(jugador2);
+                        // ----------------
+
                         turnos.encolar(jugador1);
                         turnos.encolar(jugador2);
                     }
@@ -66,7 +77,9 @@ public class Main {
                     limpiarConsola();
                     System.out.println("Barajando y repartiendo cartas...");
 
-                    Carta[] mazoCentral = inicializarBaraja(random, palos, nombresCartas);
+                    // --- LO NUEVO: Agregamos barajaExtra aquí ---
+                    Carta[] mazoCentral = inicializarBaraja(random, palos, nombresCartas, barajaExtra);
+                    // ----------------
                     int indexMazo = 0;
 
                     mazoJugador1.vaciar();
@@ -214,6 +227,12 @@ public class Main {
 
                     Carta[] manoJugador1 = { cartaElegidaJ1, cartaDescarteJ1 };
                     Carta[] manoJugador2 = { cartaElegidaJ2, cartaDescarteJ2 };
+
+                    // --- LO NUEVO ---
+                    j1.setManoActual(manoJugador1);
+                    j2.setManoActual(manoJugador2);
+                    // ----------------
+
                     Carta[][] todosLosJugadores = { manoJugador1, manoJugador2 };
 
                     int indiceGanador = motorPoker.determinarGanador(centro, todosLosJugadores);
@@ -257,6 +276,22 @@ public class Main {
                             valorCiegaRonda
                     );
 
+                    // --- LO NUEVO ---
+                    System.out.println("\n--- RECOMPENSAS ---");
+                    j1.agregarDolares(3);
+                    j2.agregarDolares(3);
+                    System.out.println("Se han otorgado $3 dólares a cada jugador.");
+
+                    System.out.println("\nPresiona ENTER para entrar a la Tienda...");
+                    scanner.nextLine();
+
+                    limpiarConsola();
+                    Tienda.entrarTienda(j1, barajaExtra);
+
+                    limpiarConsola();
+                    Tienda.entrarTienda(j2, barajaExtra);
+                    // ----------------
+
                     System.out.println("\nPresiona ENTER para regresar al menú...");
                     scanner.nextLine();
                     break;
@@ -289,7 +324,8 @@ public class Main {
         scanner.close();
     }
 
-    private static Carta[] inicializarBaraja(Random random, String[] palos, String[] nombres) {
+    // --- LO NUEVO: Se añade el parámetro barajaExtra al método ---
+    private static Carta[] inicializarBaraja(Random random, String[] palos, String[] nombres, TablaHash barajaExtra) {
         Carta[] tempBaraja = new Carta[52];
         int cont = 0;
 
@@ -314,13 +350,20 @@ public class Main {
             }
         }
 
-        for (int i = tempBaraja.length - 1; i > 0; i--) {
+        // --- LO NUEVO: Meter las cartas de la tabla hash al mazo antes de barajar ---
+        Carta[] extras = barajaExtra.obtenerTodasLasCartas();
+        Carta[] tempBarajaTotal = new Carta[tempBaraja.length + extras.length];
+        System.arraycopy(tempBaraja, 0, tempBarajaTotal, 0, tempBaraja.length);
+        System.arraycopy(extras, 0, tempBarajaTotal, tempBaraja.length, extras.length);
+
+        for (int i = tempBarajaTotal.length - 1; i > 0; i--) {
             int index = random.nextInt(i + 1);
-            Carta a = tempBaraja[index];
-            tempBaraja[index] = tempBaraja[i];
-            tempBaraja[i] = a;
+            Carta a = tempBarajaTotal[index];
+            tempBarajaTotal[index] = tempBarajaTotal[i];
+            tempBarajaTotal[i] = a;
         }
-        return tempBaraja;
+        return tempBarajaTotal;
+        // ----------------
     }
 
     private static void limpiarConsola() {
