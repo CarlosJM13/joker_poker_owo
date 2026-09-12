@@ -1,3 +1,4 @@
+/*
 import java.util.Random;
 import java.util.Scanner;
 
@@ -370,3 +371,4 @@ public class Main {
         for (int i = 0; i < 35; i++) System.out.println();
     }
 }
+ */
