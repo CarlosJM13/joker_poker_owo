@@ -6,6 +6,9 @@ public class Carta {
     private int fichaAzules;
     private int multiRojo;
 
+    // Atributo para rastrear el nivel de evolucion en el arbol
+    public NodoArbol nivelActual;
+
     //Fichas azules agregan fichas al puntaje.
     //Multiplicadores rojos aumentan el multiplicador para consultar los multiplicadores
     public int verfichazul(){return fichaAzules;}
@@ -16,8 +19,18 @@ public class Carta {
         this.palo = palo;
         this.valorNumerico = valorNumerico;
         this.comunitaria = comunitaria;
-        this.fichaAzules = fichaAzules;
-        this.multiRojo = multiRojo;
+
+        // Se inicializan en 0 como indica el estado base del diagrama
+        this.fichaAzules = 0;
+        this.multiRojo = 0;
+    }
+    // Metodo para asignar evolución y sumar los atributos del árbol
+    public void setNivelEvolucion(NodoArbol nuevoNivel) {
+        this.nivelActual = nuevoNivel;
+
+        // Sumamos las estadísticas que otorga este nuevo nodo del árbol a la carta
+        this.fichaAzules += nuevoNivel.extraAzules;
+        this.multiRojo += nuevoNivel.extraRojas;
     }
 
     public String getNombre() { return nombre; }
@@ -34,7 +47,8 @@ public class Carta {
 
     @Override
     public String toString() {
-        return nombre + " de " + palo + " (Valor: " + valorNumerico + ")";
+        //Ahora muestra las fichas azules y rojas actuales de la carta para se pueda ver el efecto en consola
+        return nombre + " de " + palo + " (Valor: " + valorNumerico + " | Azules: +" + fichaAzules + ", Rojas: +" + multiRojo + ")";
     }
 
     public boolean esRoja() {
