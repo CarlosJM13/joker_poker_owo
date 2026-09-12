@@ -11,7 +11,7 @@ public class Carta {
     public int verfichazul(){return fichaAzules;}
     public int vermultirojo(){return multiRojo;}
 
-    public Carta(String nombre, String palo, int valorNumerico, boolean comunitaria, int fichaAzules, int multiRojo) {
+    public Carta(String nombre, String palo, int valorNumerico, boolean comunitaria) {
         this.nombre = nombre;
         this.palo = palo;
         this.valorNumerico = valorNumerico;
