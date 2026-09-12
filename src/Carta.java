@@ -50,4 +50,12 @@ public class Carta {
         //Ahora muestra las fichas azules y rojas actuales de la carta para se pueda ver el efecto en consola
         return nombre + " de " + palo + " (Valor: " + valorNumerico + " | Azules: +" + fichaAzules + ", Rojas: +" + multiRojo + ")";
     }
+
+    public boolean esRoja() {
+        return palo.equalsIgnoreCase("corazon") || palo.equalsIgnoreCase("diamante");
+    }
+
+    public boolean esNegra() {
+        return palo.equalsIgnoreCase("trebol") || palo.equalsIgnoreCase("pica");
+    }
 }
