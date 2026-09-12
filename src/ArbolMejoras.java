@@ -8,7 +8,7 @@ public class ArbolMejoras {
 
     // Metodo para las vias de evolucion
     public void inicializarRutas() {
-        // Nivel 1 - Vía Izquierda (Mejora Azul): Muchas azules, poquitas rojas
+        // Nivel 1 - izquierda mejora de muchas azules, una roja
         raiz.izquierdo = new NodoArbol("Mejora Azul", 5, 1);
 
         // Nivel 1 - derecha mas al multplicador, muchas rojas, una azul
