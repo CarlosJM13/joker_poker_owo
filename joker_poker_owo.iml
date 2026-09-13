@@ -122,7 +122,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="openjfx-26.0.2_windows-x64_bin-sdk" level="project" />
-    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="javafx.base" level="project" />
   </component>
 </module>
