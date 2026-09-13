@@ -77,4 +77,8 @@ public class ListaDoble {
         }
         System.out.println("-----------------------------------------");
     }
+
+    public int getTamaño() {
+        return contadorRondas - 1;
+    }
 }
