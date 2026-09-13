@@ -1,12 +1,14 @@
 public class Jugador {
     private String nombre;
     private int dolares;
+    private int fichas;
     private Carta[] manoActual;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
         this.dolares = 0;
-        this.manoActual = new Carta[2]; // Espacio para las 2 cartas con las que juega en la ronda
+        this.fichas = 0;
+        this.manoActual = new Carta[2];
     }
 
     public String getNombre() {
@@ -23,6 +25,14 @@ public class Jugador {
 
     public void setDolares(int dolares) {
         this.dolares = dolares;
+    }
+
+    public int getFichas() {
+        return fichas;
+    }
+
+    public void setFichas(int fichas) {
+        this.fichas = fichas;
     }
 
     public Carta[] getManoActual() {
@@ -44,4 +54,10 @@ public class Jugador {
         }
         return false;
     }
+
+    private int mejorasDisponibles = 0;
+
+    public int getMejorasDisponibles() { return mejorasDisponibles; }
+    public void agregarMejora() { this.mejorasDisponibles++; }
+    public void usarMejora() { this.mejorasDisponibles--; }
 }

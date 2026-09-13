@@ -2,43 +2,39 @@ public class MotorPuntaje {
 
     private jokerComunal comunal = new jokerComunal();
 
-    public int calcularJugadaFinal(Carta[] centro, Carta[] cartasJugador, Joker[] jokersActivos, int nivelRecursividad) {
+    public ResultadoMano calcularJugadaConDetalle(Carta[] centro, Carta[] cartasJugador, Joker[] jokersActivos, int nivelRecursividad) {
         Carta[] jugadaCompleta = new Carta[7];
-        // 7 cartas porque 5 son las de la mesa y 2 son las propias
         System.arraycopy(centro, 0, jugadaCompleta, 0, 5);
         System.arraycopy(cartasJugador, 0, jugadaCompleta, 5, 2);
 
         int fichasBase = 5;
         int multiBase = 1;
+        String nombreMano = "Carta Alta";
 
-        // 1. Identifica la mano (incluye manos de poker especiales de Joker Poker como 7 flush)
         int maximasIguales = contarMaximasIguales(jugadaCompleta);
         boolean hayColor = comprobarColor(jugadaCompleta);
         boolean hayEscalera = comprobarEscalera(jugadaCompleta);
 
-        // Tabla de puntajes base
-        if (hayColor && maximasIguales == 7) { fichasBase = 200; multiBase = 15; } // Seven of a Kind Flush
-        else if (maximasIguales == 7) { fichasBase = 150; multiBase = 12; }        // Seven of a Kind
-        else if (hayColor && maximasIguales == 6) { fichasBase = 180; multiBase = 14; } // Six of a Kind Flush
-        else if (maximasIguales == 6) { fichasBase = 120; multiBase = 10; }        // Six of a Kind
-        else if (hayColor && maximasIguales == 5) { fichasBase = 150; multiBase = 12; } // Flush Five
-        else if (maximasIguales == 5) { fichasBase = 100; multiBase = 8; }         // Five of a Kind
-        else if (hayColor && hayEscalera) { fichasBase = 100; multiBase = 8; }     // Straight Flush
-        else if (maximasIguales == 4) { fichasBase = 60; multiBase = 7; }          // Four of a Kind
-        else if (esFullHouse(jugadaCompleta)) { fichasBase = 40; multiBase = 4; }  // Full House
-        else if (hayColor) { fichasBase = 35; multiBase = 4; }                     // Flush
-        else if (hayEscalera) { fichasBase = 30; multiBase = 4; }                  // Straight
-        else if (maximasIguales == 3) { fichasBase = 30; multiBase = 3; }          // Three of a kind
-        else if (esDoblePar(jugadaCompleta)) { fichasBase = 20; multiBase = 2; }   // Two Pair
-        else if (maximasIguales == 2) { fichasBase = 10; multiBase = 2; }          // Pair
-        // Carta alta por defecto: 5 x 1 (ya que son las fichas y multi base)
+        // Tabla de puntajes base y asignación de nombre de mano
+        if (hayColor && maximasIguales == 7) { fichasBase = 200; multiBase = 15; nombreMano = "Seven of a Kind Flush"; }
+        else if (maximasIguales == 7) { fichasBase = 150; multiBase = 12; nombreMano = "Seven of a Kind"; }
+        else if (hayColor && maximasIguales == 6) { fichasBase = 180; multiBase = 14; nombreMano = "Six of a Kind Flush"; }
+        else if (maximasIguales == 6) { fichasBase = 120; multiBase = 10; nombreMano = "Six of a Kind"; }
+        else if (hayColor && maximasIguales == 5) { fichasBase = 150; multiBase = 12; nombreMano = "Flush Five"; }
+        else if (maximasIguales == 5) { fichasBase = 100; multiBase = 8; nombreMano = "Five of a Kind"; }
+        else if (hayColor && hayEscalera) { fichasBase = 100; multiBase = 8; nombreMano = "Straight Flush"; }
+        else if (maximasIguales == 4) { fichasBase = 60; multiBase = 7; nombreMano = "Four of a Kind"; }
+        else if (esFullHouse(jugadaCompleta)) { fichasBase = 40; multiBase = 4; nombreMano = "Full House"; }
+        else if (hayColor) { fichasBase = 35; multiBase = 4; nombreMano = "Color (Flush)"; }
+        else if (hayEscalera) { fichasBase = 30; multiBase = 4; nombreMano = "Escalera (Straight)"; }
+        else if (maximasIguales == 3) { fichasBase = 30; multiBase = 3; nombreMano = "Trío"; }
+        else if (esDoblePar(jugadaCompleta)) { fichasBase = 20; multiBase = 2; nombreMano = "Doble Par"; }
+        else if (maximasIguales == 2) { fichasBase = 10; multiBase = 2; nombreMano = "Par"; }
 
         int totalFichas = fichasBase;
         int totalMulti = multiBase;
 
-        // 2. Encolar las cartas en cola de prioridad para que surta efecto los comodines
         ColaPrioridad calculoPuntaje = new ColaPrioridad();
-        // Checamos si no esta vacío y encolamos los comodines
         if (jokersActivos != null) {
             for (Joker j : jokersActivos) {
                 if (j != null) calculoPuntaje.encolarJoker(j);
@@ -48,7 +44,6 @@ public class MotorPuntaje {
             calculoPuntaje.encolarCarta(c);
         }
 
-        // 3. sumas y multi
         int bonoRojoActivo = 0;
         int bonoNegroActivo = 0;
 
@@ -64,7 +59,9 @@ public class MotorPuntaje {
                 }
             } else {
                 Carta c = nodo.getCarta();
-                totalFichas += c.verfichazul();
+
+                // --- AQUÍ COLOCAS LA LÍNEA MODIFICADA ---
+                totalFichas += c.getValorNumerico() + c.verfichazul();
                 totalMulti += c.vermultirojo();
 
                 String palo = c.getPalo();
@@ -75,12 +72,9 @@ public class MotorPuntaje {
                 }
             }
         }
-
-        // 4. Aplicar el Joker Comunal que usa recursividad
-        // Se envía el total de fichas como puntaje, el multi como multiplicador, y las veces de recursividad
         int puntajeFinal = comunal.aplicarMultiplicador(totalFichas, totalMulti, nivelRecursividad);
 
-        return puntajeFinal;
+        return new ResultadoMano(nombreMano, puntajeFinal);
     }
 
     // metodos para manos de 7 cartas teoricamente posibles

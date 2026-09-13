@@ -1,76 +1,85 @@
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
-/**
- * Tu ListaDoble guarda AMBOS jugadores en un solo NodoDoble por ronda
- * (nombreJ1/manoJ1/cartasJ1/superoCiegaJ1 + su espejo para J2), así que
- * aquí solo se recorre una vez y se pintan las 2 columnas por fila,
- * igual que en tu mockup.
- *
- * Los campos de NodoDoble no tienen modificador (package-private), y como
- * ninguna de nuestras clases usa `package`, están todas en el paquete por
- * defecto -> se puede acceder directo a actual.nombreJ1, actual.siguiente, etc.
- */
 public class HistorialPartidas {
-
-    public static Scene crearEscena(GestorEscenas gestor) {
-        VBox raiz = new VBox(15);
-        raiz.setAlignment(Pos.CENTER);
-        raiz.getChildren().add(new Label("Historial jugadas"));
-
-        Partida partida = gestor.getPartida();
-        if (partida != null) {
-            VBox lista = construirLista(partida.getHistorialRondas());
-            ScrollPane scroll = new ScrollPane(lista);
-            scroll.setFitToWidth(true);
-            raiz.getChildren().add(scroll);
-        }
-
-        Button btnVolver = new Button("Volver");
-        btnVolver.setOnAction(e -> gestor.irA(EstadoJuego.MENU_PRINCIPAL));
-        raiz.getChildren().add(btnVolver);
-
-        return new Scene(raiz, 900, 550);
+    private BorderPane root;
+    private ListaDoble historial;
+    private GestorEscenas gestor;
+    
+    public HistorialPartidas(ListaDoble historial, GestorEscenas gestor) {
+        this.historial = historial;
+        this.gestor = gestor;
+        crearUI();
     }
-
-    private static VBox construirLista(ListaDoble historial) {
-        VBox contenedor = new VBox(20);
-        contenedor.setAlignment(Pos.CENTER);
-
-        NodoDoble actual = historial.cabeza;
-        int ronda = 1;
-        if (actual == null) {
-            contenedor.getChildren().add(new Label("Historial vacío."));
-        }
-
-        while (actual != null) {
-            HBox fila = new HBox(40);
-            fila.setAlignment(Pos.CENTER);
-            fila.getChildren().add(construirColumnaJugador("Ronda " + ronda + " — " + actual.nombreJ1,
-                    actual.cartasJ1, actual.manoJ1, actual.superoCiegaJ1, actual.valorCiega));
-            fila.getChildren().add(construirColumnaJugador(actual.nombreJ2,
-                    actual.cartasJ2, actual.manoJ2, actual.superoCiegaJ2, actual.valorCiega));
-            contenedor.getChildren().add(fila);
-
-            actual = actual.siguiente;
-            ronda++;
-        }
-        return contenedor;
+    
+    private void crearUI() {
+        root = new BorderPane();
+        root.setStyle("-fx-background: linear-gradient(135deg, #1a237e 0%, #512da8 25%, #6a1b9a 50%, #7b1fa2 75%, #512da8 100%);");
+        
+        // Encabezado
+        VBox encabezado = new VBox(10);
+        encabezado.setAlignment(Pos.CENTER);
+        encabezado.setStyle("-fx-padding: 20; -fx-background-color: rgba(0, 0, 0, 0.5);");
+        
+        Text titulo = new Text("HISTORIAL DE PARTIDAS");
+        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 40));
+        titulo.setFill(Color.web("#FFD700"));
+        
+        encabezado.getChildren().add(titulo);
+        root.setTop(encabezado);
+        
+        // Centro: listado de rondas
+        VBox contenido = crearListadoRondas();
+        root.setCenter(contenido);
+        
+        // Pie
+        HBox pie = new HBox(10);
+        pie.setAlignment(Pos.CENTER);
+        pie.setStyle("-fx-padding: 15; -fx-background-color: rgba(0, 0, 0, 0.5);");
+        
+        Button btnVolver = new Button("Volver al Menú");
+        btnVolver.setStyle("-fx-font-size: 14; -fx-padding: 10 30; -fx-background-color: #2196F3; -fx-text-fill: white;");
+        btnVolver.setOnAction(e -> gestor.mostrarMenuPrincipal());
+        
+        pie.getChildren().add(btnVolver);
+        root.setBottom(pie);
     }
-
-    private static VBox construirColumnaJugador(String titulo, String cartas, String mano, boolean supero, int valorCiega) {
-        VBox columna = new VBox(4);
-        columna.getChildren().add(new Label(titulo));
-        columna.getChildren().add(new Label("Cartas: " + cartas));
-        columna.getChildren().add(new Label("Mano: " + mano));
-        columna.getChildren().add(new Label(supero
-                ? "Superó ciega de valor " + valorCiega
-                : "Perdió ciega de valor " + valorCiega));
-        return columna;
+    
+    private VBox crearListadoRondas() {
+        VBox contenido = new VBox(10);
+        contenido.setStyle("-fx-padding: 20;");
+        
+        Text infoText = new Text("Total de rondas jugadas: " + (historial != null ? historial.getTamaño() : 0));
+        infoText.setFont(Font.font("Arial", 16));
+        infoText.setFill(Color.WHITE);
+        
+        contenido.getChildren().add(infoText);
+        
+        // Aquí puedes iterar sobre el historial y mostrar las rondas
+        // Por ahora, mostraremos un mensaje simple
+        if (historial != null && historial.getTamaño() > 0) {
+            Text detalles = new Text("El historial contiene información de cada ronda jugada.");
+            detalles.setFont(Font.font("Arial", 14));
+            detalles.setFill(Color.web("#B3E5FC"));
+            contenido.getChildren().add(detalles);
+        } else {
+            Text vacio = new Text("No hay partidas registradas aún.");
+            vacio.setFont(Font.font("Arial", 14));
+            vacio.setFill(Color.web("#FFB74D"));
+            contenido.getChildren().add(vacio);
+        }
+        
+        return contenido;
+    }
+    
+    public BorderPane getRoot() {
+        return root;
     }
 }

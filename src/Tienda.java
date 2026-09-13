@@ -1,41 +1,84 @@
-public class Tienda {
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundSize;
+import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
+public class Tienda {
     private TablaHash barajaExtra;
 
     public Tienda(TablaHash barajaExtra) {
         this.barajaExtra = barajaExtra;
     }
 
-    // Método que se ejecuta cuando el jugador presiona el botón de comprar la copia de su mano en la Tienda
+    public static void iniciar(GestorEscenas gestor) {
+        Partida partida = gestor.getPartida();
+        Jugador j1 = partida.getJugador1();
+        Jugador j2 = partida.getJugador2();
+
+        // Se otorgan exactamente 3 dólares al terminar cada ciega/ronda a ambos jugadores
+        int oroGanadoPorRonda = 3;
+        j1.setDolares(j1.getDolares() + oroGanadoPorRonda);
+        j2.setDolares(j2.getDolares() + oroGanadoPorRonda);
+
+        EscenaTienda.mostrar(gestor, 1, () -> {
+            PantallaTransicion.mostrar(gestor, "Cede la computadora al Jugador 2 para la tienda", () -> {
+                EscenaTienda.mostrar(gestor, 2, () -> {
+                    partida.iniciarNuevaRonda();
+                    Ronda.iniciarSecuenciaTurnos(gestor);
+                });
+            });
+        });
+    }
+
     public boolean comprarDuplicarMano(Jugador jugador) {
         int costo = 3;
-
-        // Validamos si el jugador tiene suficientes dólares (3 dólares como dictan las reglas del juego)
         if (jugador.getDolares() >= costo) {
-            jugador.gastarDolares(costo);
+            jugador.setDolares(jugador.getDolares() - costo);
 
-            // Obtenemos la mano actual del jugador y la duplicamos hacia la Tabla Hash
             Carta[] mano = jugador.getManoActual();
             for (Carta c : mano) {
-                if (c != null) {
-                    // Creamos una copia de la carta conservando sus atributos y evoluciones del árbol
-                    Carta copia = new Carta(c.getNombre(), c.getPalo(), c.getValorNumerico(), c.isComunitaria());
-
-                    // Si la carta original ya evolucionó con el árbol, pasamos sus mejoras
-                    if (c.nivelActual != null) {
-                        copia.setNivelEvolucion(c.nivelActual);
-                    }
-
-                    // Generamos una clave única basada en el nombre y un identificador aleatorio
-                    String claveUnica = jugador.getNombre() + "_" + copia.getNombre() + "_" + copia.getPalo() + "_" + System.nanoTime();
-
-                    // Insertamos la carta duplicada en tu Tabla Hash (Baraja Extra)
-                    barajaExtra.insertar(claveUnica, copia);
+                if (c != null && barajaExtra != null) {
+                    String claveUnica = c.getNombre() + "_" + c.getPalo() + "_" + System.nanoTime();
+                    barajaExtra.insertar(claveUnica, c);
                 }
             }
-            return true; // Compra exitosa
+            return true;
         }
+        return false;
+    }
 
-        return false; // No le alcanzó el dinero
+    // Lógica para comprar comodines de palo rojo o negro
+    public boolean comprarComodin(GestorEscenas gestor, int numJugador, String colorObjetivo) {
+        Partida partida = gestor.getPartida();
+        Jugador jugador = numJugador == 1 ? partida.getJugador1() : partida.getJugador2();
+
+        int costo = 3;
+        if (jugador.getDolares() >= costo) {
+            jugador.setDolares(jugador.getDolares() - costo);
+
+            // Instanciamos el Joker con los 2 argumentos que exige su constructor
+            Joker nuevoJoker = new Joker(colorObjetivo, 4); // 4 fichas de bono
+
+            // Lo agregamos a la lista de jokers activa de la partida
+            if (numJugador == 1) {
+                partida.getJokersJ1().add(nuevoJoker);
+            } else {
+                partida.getJokersJ2().add(nuevoJoker);
+            }
+
+            return true;
+        }
+        return false;
     }
 }
