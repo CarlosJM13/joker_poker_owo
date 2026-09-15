@@ -1,3 +1,10 @@
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
+
 public class Carta {
     private String nombre;
     private String palo;
