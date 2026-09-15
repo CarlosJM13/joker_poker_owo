@@ -32,6 +32,37 @@ public class PantallaMejora {
         PantallaMejora pantalla = new PantallaMejora(partida.getArbolMejoras(), carta, onMejoraCompleta);
         gestor.mostrar(new Scene(pantalla.getRoot(), 1024, 768));
     }
+    // PARRA CHECA ESTO PARA IMPLEMENTAR
+    private void aplicarMejora(boolean esIzquierda, java.util.List<Carta> cartasSeleccionadas) {
+        // Validar el límite de máximo 2 cartas que pediste
+        if (cartasSeleccionadas.size() > 2) {
+            System.out.println("Solo puedes mejorar un máximo de 2 cartas a la vez.");
+            return;
+        }
+
+        for (Carta carta : cartasSeleccionadas) {
+            // 1. Si la carta no ha sido mejorada nunca, empieza en la raiz del arbol
+            if (carta.nivelActual == null) {
+                carta.nivelActual = arbolMejoras.raiz;
+            }
+
+            // 2. Navegar el arbol binario según la elección del jugador
+            NodoArbol siguienteNodo = esIzquierda ? carta.nivelActual.izquierdo : carta.nivelActual.derecho;
+
+            // 3. Aplicar la evolución si el nodo existe
+            if (siguienteNodo != null) {
+                carta.setNivelEvolucion(siguienteNodo);
+                System.out.println(carta.getNombre() + " subió a: " + siguienteNodo.nivelEvolucion);
+            } else {
+                System.out.println(carta.getNombre() + " ya está en el nivel máximo de esta rama.");
+            }
+        }
+
+        // 4. Terminar y ejecutar Y regresar a la tienda
+        if (onMejoraCompleta != null) {
+            onMejoraCompleta.run();
+        }
+    }
 
     private void crearUI() {
         root = new BorderPane();

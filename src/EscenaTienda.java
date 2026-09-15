@@ -43,6 +43,7 @@ public class EscenaTienda {
             root.setStyle("-fx-background-color: #2b1d0c;");
         }
 
+
         VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
         panelPergamino.setMaxWidth(880);
@@ -80,9 +81,23 @@ public class EscenaTienda {
             boolean exito = tiendaLogica.comprarComodin(gestor, numJugador, "negro");
             actualizarSaldo(exito, "¡Comodín negro adquirido!");
         });
+        //
+        //PARRA CHECA ESTA PARTE DEL CODIGO PARA QUE PUEDEAS IMPLEMENTAR LA NUEVA PANTALLA DE MEJORA
+        // Agregar en crearUI() de EscenaTienda.java, debajo de op3
+        VBox op4 = crearOpcionTienda("2 DÓLARES", "Evolucionar cartas\nen el Árbol", "#2e8b57", "/assets/jokers/JokerCartasN.png");
 
-        // Agregamos SOLO las 3 opciones a la pantalla
-        contenedorOpciones.getChildren().addAll(op1, op2, op3);
+        op4.setOnMouseClicked(e -> {
+            // Definimos cómo regresar a esta misma tienda después de la mejora
+            Runnable volverATienda = () -> EscenaTienda.mostrar(gestor, numJugador, onTiendaCompleta);
+
+            boolean exito = tiendaLogica.comprarMejoraArbol(gestor, numJugador, volverATienda);
+            if (!exito) {
+                actualizarSaldo(false, "Fondos insuficientes");
+            }
+        });
+
+// NO OLVIDAR actualizar el HBox para incluir op4
+        contenedorOpciones.getChildren().addAll(op1, op2, op3, op4);
 
 
         Button btnContinuar = new Button("Terminar Compras");
@@ -142,6 +157,7 @@ public class EscenaTienda {
             textSaldo.setTextFill(javafx.scene.paint.Color.web("#a42a2a"));
         }
     }
+
 
     public StackPane getRoot() {
         return root;
