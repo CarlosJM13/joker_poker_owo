@@ -81,4 +81,20 @@ public class Tienda {
         }
         return false;
     }
+
+    // nuevo metodo para poder mejorar la carta directamente
+    public boolean comprarMejoraArbol(GestorEscenas gestor, int numJugador, Runnable alTerminarMejora) {
+        Partida partida = gestor.getPartida();
+        Jugador jugador = numJugador == 1 ? partida.getJugador1() : partida.getJugador2();
+
+        int costo = 2; // precio? >:)
+        if (jugador.getDolares() >= costo) {
+            jugador.setDolares(jugador.getDolares() - costo);
+
+            // Abre la pantalla de mejora y le pasa el llamado a la tienda para regresar a la tienda
+            PantallaMejora.mostrar(gestor, numJugador, alTerminarMejora);
+            return true;
+        }
+        return false;
+    }
 }
