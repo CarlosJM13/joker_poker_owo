@@ -39,7 +39,6 @@ public class CargadorImagenes {
             }
         }
 
-        // Traducción por si viene como "As"
         if (valor.equalsIgnoreCase("As")) {
             valor = "A";
         }

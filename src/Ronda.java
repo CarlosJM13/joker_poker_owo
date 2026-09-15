@@ -501,11 +501,15 @@ public class Ronda {
         Carta[] mesaComunArr = partida.getMesaComun().toArray(new Carta[0]);
 
         List<Carta> listaManoJ1 = new ArrayList<>();
-        for (Carta c : j1.getManoActual()) { if (c != null) listaManoJ1.add(c); }
+        for (Carta c : j1.getManoActual()) {
+            if (c != null) listaManoJ1.add(c);
+        }
         Carta[] manoJ1Arr = listaManoJ1.toArray(new Carta[0]);
 
         List<Carta> listaManoJ2 = new ArrayList<>();
-        for (Carta c : j2.getManoActual()) { if (c != null) listaManoJ2.add(c); }
+        for (Carta c : j2.getManoActual()) {
+            if (c != null) listaManoJ2.add(c);
+        }
         Carta[] manoJ2Arr = listaManoJ2.toArray(new Carta[0]);
 
         Joker[] jokersJ1Arr = partida.getJokersJ1().toArray(new Joker[0]);
@@ -537,10 +541,11 @@ public class Ronda {
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 22));
         titulo.setTextFill(Color.web("#3b220b"));
 
-        long metaFichas = partida.getMetaFichas();
-        if (metaFichas <= 0) {
-            metaFichas = 150; // Meta base por defecto para que no muestre 0
-        }
+        // Obtenemos en qué ronda vamos
+        int rondaActual = partida.getNumeroRonda();
+
+        // Hacemos que la meta escale (150 en ronda 1, 300 en ronda 2, 450 en ronda 3...)
+        long metaFichas = 150L * rondaActual;
 
         Label lblMeta = new Label("Meta de Fichas Requerida: " + metaFichas);
         lblMeta.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
@@ -568,7 +573,7 @@ public class Ronda {
         };
 
         guiaManosBox.getChildren().add(lblGuiaTitulo);
-        for(String textoMano : infoManos) {
+        for (String textoMano : infoManos) {
             Label lblM = new Label(textoMano);
             lblM.setFont(Font.font("Georgia", FontPosture.ITALIC, 11));
             lblM.setTextFill(Color.web("#5c3a18"));
@@ -589,8 +594,10 @@ public class Ronda {
         labelJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
         labelJ2.setTextFill(Color.web("#3b220b"));
 
-        boolean perdioJ1 = puntajeFinalJ1 < partida.getMetaFichas();
-        boolean perdioJ2 = puntajeFinalJ2 < partida.getMetaFichas();
+
+        boolean perdioJ1 = puntajeFinalJ1 < metaFichas;
+        boolean perdioJ2 = puntajeFinalJ2 < metaFichas;
+
         String resultadoPartida = (perdioJ1 || perdioJ2)
                 ? "¡Alerta! Un jugador no alcanzó la meta."
                 : "¡Excelente! Ambos superaron la meta.";
@@ -604,6 +611,12 @@ public class Ronda {
 
         cuerpoPrincipal.getChildren().addAll(guiaManosBox, resultadosBox);
 
+        // --- BOTONES FINALES ---
+        Button btnMenuPrincipal = new Button("Volver al Menú");
+        btnMenuPrincipal.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
+        btnMenuPrincipal.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
+        btnMenuPrincipal.setOnAction(e -> gestor.mostrarMenuPrincipal());
+
         Button btnSiguienteRonda = new Button("Siguiente Ronda / Tienda");
         btnSiguienteRonda.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
         btnSiguienteRonda.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
@@ -611,12 +624,31 @@ public class Ronda {
         btnSiguienteRonda.setOnAction(e -> {
             if (perdioJ1 || perdioJ2) {
                 System.out.println("Fin del juego por no pasar la meta.");
+                // gestor.mostrarGameOver();
             } else {
                 Tienda.iniciar(gestor);
             }
         });
 
-        panelPergamino.getChildren().addAll(titulo, lblMeta, cuerpoPrincipal, btnSiguienteRonda);
+        HBox botonesBox = new HBox(20, btnMenuPrincipal, btnSiguienteRonda);
+        botonesBox.setAlignment(Pos.CENTER);
+
+        if (partida.getHistorialRondas() != null) {
+            partida.getHistorialRondas().agregar(
+                    j1.getNombre(),
+                    resJ1.getNombreMano(),
+                    String.valueOf(puntajeFinalJ1),
+                    !perdioJ1,
+                    j2.getNombre(),
+                    resJ2.getNombreMano(),
+                    String.valueOf(puntajeFinalJ2),
+                    !perdioJ2,
+                    (int) metaFichas
+            );
+        }
+
+        panelPergamino.getChildren().addAll(titulo, lblMeta, cuerpoPrincipal, botonesBox);
+
         raiz.getChildren().add(panelPergamino);
         gestor.mostrar(new Scene(raiz, 1024, 768));
     }

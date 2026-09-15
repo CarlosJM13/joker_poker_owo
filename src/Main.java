@@ -6,7 +6,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Inicia la música global del juego en segundo plano
             GestorAudio.reproducirMusicaFondo("/assets/theme/theme.mp3");
 
             GestorEscenas gestor = new GestorEscenas(primaryStage);

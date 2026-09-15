@@ -60,7 +60,6 @@ public class MotorPuntaje {
             } else {
                 Carta c = nodo.getCarta();
 
-                // --- AQUÍ COLOCAS LA LÍNEA MODIFICADA ---
                 totalFichas += c.getValorNumerico() + c.verfichazul();
                 totalMulti += c.vermultirojo();
 
@@ -129,7 +128,6 @@ public class MotorPuntaje {
     private boolean esFullHouse(Carta[] cartas) {
         int maxIguales = contarMaximasIguales(cartas);
         if (maxIguales >= 3) {
-            // Buscamos si existe un par para juntar una tercia y un par = fullhouse
             int valorTrio = -1;
             for (int i = 0; i < cartas.length; i++) {
                 int count = 0;
