@@ -50,7 +50,7 @@ public class MenuPrincipal {
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 54));
         titulo.setFill(Color.web("#3b220b"));
 
-        Text subtitulo = new Text("ola luis");
+        Text subtitulo = new Text("¡BIENVENIDO AL JUEGO!");
         subtitulo.setFont(Font.font("Georgia", FontPosture.ITALIC, 16)); // <-- Uso correcto de FontPosture
         subtitulo.setFill(Color.web("#5c3a18"));
 
