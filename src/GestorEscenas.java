@@ -2,6 +2,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import java.util.List;
+import java.util.ArrayList;
 
 public class GestorEscenas {
     private Stage stage;
@@ -70,7 +72,16 @@ public class GestorEscenas {
     }
 
     public void mostrarHistorial() {
-        HistorialPartidas historial = new HistorialPartidas(partida.getHistorialRondas(), this);
+        // Si la partida es null (no se ha jugado nada), creamos una ListaDoble vacía para que no truene
+        ListaDoble datosHistorial;
+        if (partida != null && partida.getHistorialRondas() != null) {
+            datosHistorial = partida.getHistorialRondas();
+        } else {
+            datosHistorial = new ListaDoble();
+        }
+
+        // Nota el orden: primero la ListaDoble, luego el gestor (así lo pide tu HistorialPartidas)
+        HistorialPartidas historial = new HistorialPartidas(datosHistorial, this);
         mostrar(new Scene(historial.getRoot(), 1024, 768));
     }
 
