@@ -13,20 +13,18 @@ public class GestorEscenas {
         this.stage = stage;
     }
 
-    // --- NUEVOS MÉTODOS QUE RONDA.JAVA NECESITA ---
     public void mostrar(Scene scene) {
-        stage.setScene(scene);
-    }
+        // 1. Preparamos el efecto de Fade-In (Transición de cine)
+        javafx.scene.Parent root = scene.getRoot();
+        root.setOpacity(0); // Inicia invisible
 
-    public void irA(EstadoJuego estado) {
-        switch (estado) {
-            case MENU_PRINCIPAL: mostrarMenuPrincipal(); break;
-            case REGISTRO_JUGADOR_1:
-            case REGISTRO_JUGADOR_2: mostrarRegistroJugadores(); break;
-            case HISTORIAL_PARTIDAS: mostrarHistorial(); break;
-            case PARTIDA_EN_CURSO: iniciarRonda(); break;
-            case GAME_OVER: mostrarGameOver(); break;
-        }
+        javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(500), root);
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0); // Termina 100% visible
+        ft.play();
+
+        // 2. Mostramos la escena
+        stage.setScene(scene);
     }
     // ----------------------------------------------
 

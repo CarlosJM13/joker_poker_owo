@@ -1,12 +1,16 @@
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.FontPosture;
-import javafx.scene.image.Image;
+import javafx.util.Duration;
 
 public class HistorialPartidas {
     private StackPane root;
@@ -22,39 +26,35 @@ public class HistorialPartidas {
     private void crearUI() {
         root = new StackPane();
 
-        // 1. Fondo de Mesa de Madera
         try {
             Image imagenMesa = new Image(getClass().getResourceAsStream("/assets/fondo/mesa.jpg"));
             BackgroundImage bgMesa = new BackgroundImage(
-                    imagenMesa,
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
-                    BackgroundPosition.CENTER,
-                    new BackgroundSize(100, 100, true, true, true, true)
+                    imagenMesa, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
+                    BackgroundPosition.CENTER, new BackgroundSize(100, 100, true, true, true, true)
             );
             root.setBackground(new Background(bgMesa));
         } catch (Exception e) {
-            root.setStyle("-fx-background-color: #2b1d0c;");
+            root.setStyle("-fx-background-color: #1a1a1a;");
         }
 
-        // 2. Contenedor central simulando el pergamino/menú
         VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
-        panelPergamino.setMaxWidth(800);
-        panelPergamino.setMaxHeight(600);
+        panelPergamino.setMaxWidth(850);
+        panelPergamino.setMaxHeight(650);
         panelPergamino.setStyle(
                 "-fx-background-image: url('/assets/fondo/mplantilla2.jpg');" +
                         "-fx-background-size: stretch;" +
-                        "-fx-padding: 50;"
+                        "-fx-padding: 40;"
         );
+        panelPergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0, 0, 0, 0.7)));
 
-        // Título Estético
         Text titulo = new Text("HISTORIAL DE PARTIDAS");
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 36));
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 38));
         titulo.setFill(Color.web("#3b220b"));
+        titulo.setEffect(new DropShadow(2, 1, 1, Color.web("#ffffff")));
 
         javafx.scene.Node contenidoLista = crearListadoRondas();
 
-        // Botón para volver al menú
         Button btnVolver = new Button("Volver al Menú");
         btnVolver.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
         btnVolver.setStyle(
@@ -65,17 +65,19 @@ public class HistorialPartidas {
                         "-fx-padding: 12 30;" +
                         "-fx-cursor: hand;"
         );
+        btnVolver.setEffect(new DropShadow(2, Color.web("#ffffff")));
+
+        ScaleTransition stBtn = new ScaleTransition(Duration.millis(150), btnVolver);
+        btnVolver.setOnMouseEntered(e -> { stBtn.setToX(1.05); stBtn.setToY(1.05); stBtn.play(); });
+        btnVolver.setOnMouseExited(e -> { stBtn.setToX(1.0); stBtn.setToY(1.0); stBtn.play(); });
         btnVolver.setOnAction(e -> gestor.mostrarMenuPrincipal());
 
-        // Juntar todo en el pergamino
         panelPergamino.getChildren().addAll(titulo, contenidoLista, btnVolver);
-
-        // Agregar el pergamino al StackPane principal
         root.getChildren().add(panelPergamino);
     }
 
     private javafx.scene.Node crearListadoRondas() {
-        VBox contenido = new VBox(10);
+        VBox contenido = new VBox(15);
         contenido.setAlignment(Pos.CENTER);
         contenido.setStyle("-fx-padding: 10;");
 
@@ -85,51 +87,59 @@ public class HistorialPartidas {
         contenido.getChildren().add(infoText);
 
         if (historial != null && historial.cabeza != null) {
-            // Contenedor para las rondas con barra de desplazamiento por si son muchas
-            VBox contenedorRondas = new VBox(12);
+            VBox contenedorRondas = new VBox(15);
             contenedorRondas.setAlignment(Pos.CENTER);
+            contenedorRondas.setStyle("-fx-padding: 5 15;");
 
             NodoDoble actual = historial.cabeza;
             int numRonda = 1;
 
             while (actual != null) {
-                // Tarjeta visual para cada ronda
-                VBox cardRonda = new VBox(4);
+                VBox cardRonda = new VBox(8);
                 cardRonda.setAlignment(Pos.CENTER);
-                cardRonda.setStyle("-fx-background-color: rgba(92, 58, 24, 0.08); -fx-padding: 10; -fx-background-radius: 5;");
+                cardRonda.setStyle(
+                        "-fx-background-color: rgba(255, 250, 240, 0.6);" +
+                                "-fx-border-color: #5c3a18; -fx-border-width: 1.5;" +
+                                "-fx-padding: 15; -fx-background-radius: 8; -fx-border-radius: 8;"
+                );
+                DropShadow dsCard = new DropShadow(5, Color.color(0,0,0,0.2));
+                cardRonda.setEffect(dsCard);
 
                 Text lblTituloRonda = new Text("--- RONDA " + numRonda + " (Meta: " + actual.valorCiega + ") ---");
-                lblTituloRonda.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+                lblTituloRonda.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
                 lblTituloRonda.setFill(Color.web("#3b220b"));
 
-                // Estado Jugador 1
-                String estadoJ1 = actual.superoCiegaJ1 ? "✅ Superó la meta" : "❌ Perdió (No llegó a la meta)";
-                Text lblJ1 = new Text(actual.nombreJ1 + " (" + actual.manoJ1 + ") ➔ " + actual.cartasJ1 + " fichas | " + estadoJ1);
-                lblJ1.setFont(Font.font("Georgia", 12));
+                String estadoJ1 = actual.superoCiegaJ1 ? "✅ Superó" : "❌ Perdió";
+                Text lblJ1 = new Text(actual.nombreJ1 + " (" + actual.manoJ1 + ") ➔ " + actual.cartasJ1 + " pts | " + estadoJ1);
+                lblJ1.setFont(Font.font("Georgia", 14));
                 lblJ1.setFill(Color.web("#5c3a18"));
 
-                // Estado Jugador 2
-                String estadoJ2 = actual.superoCiegaJ2 ? "✅ Superó la meta" : "❌ Perdió (No llegó a la meta)";
-                Text lblJ2 = new Text(actual.nombreJ2 + " (" + actual.manoJ2 + ") ➔ " + actual.cartasJ2 + " fichas | " + estadoJ2);
-                lblJ2.setFont(Font.font("Georgia", 12));
+                String estadoJ2 = actual.superoCiegaJ2 ? "✅ Superó" : "❌ Perdió";
+                Text lblJ2 = new Text(actual.nombreJ2 + " (" + actual.manoJ2 + ") ➔ " + actual.cartasJ2 + " pts | " + estadoJ2);
+                lblJ2.setFont(Font.font("Georgia", 14));
                 lblJ2.setFill(Color.web("#5c3a18"));
 
                 cardRonda.getChildren().addAll(lblTituloRonda, lblJ1, lblJ2);
+
+                // Efecto hover sutil en las tarjetas del historial
+                cardRonda.setOnMouseEntered(e -> cardRonda.setStyle(cardRonda.getStyle().replace("0.6", "0.9")));
+                cardRonda.setOnMouseExited(e -> cardRonda.setStyle(cardRonda.getStyle().replace("0.9", "0.6")));
+
                 contenedorRondas.getChildren().add(cardRonda);
 
                 actual = actual.siguiente;
                 numRonda++;
             }
 
-            javafx.scene.control.ScrollPane scroll = new javafx.scene.control.ScrollPane(contenedorRondas);
-            scroll.setPrefHeight(300);
+            ScrollPane scroll = new ScrollPane(contenedorRondas);
+            scroll.setPrefHeight(350);
             scroll.setFitToWidth(true);
             scroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
             return scroll;
 
         } else {
             Text vacio = new Text("No hay partidas registradas aún.");
-            vacio.setFont(Font.font("Georgia", FontPosture.ITALIC, 14));
+            vacio.setFont(Font.font("Georgia", FontPosture.ITALIC, 16));
             vacio.setFill(Color.web("#7a5230"));
             return vacio;
         }
