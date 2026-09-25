@@ -1,14 +1,17 @@
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class RegistroJugadores {
     private StackPane root;
@@ -28,33 +31,34 @@ public class RegistroJugadores {
         try {
             Image imagenMesa = new Image(getClass().getResourceAsStream("/assets/fondo/mesa.jpg"));
             BackgroundImage bgMesa = new BackgroundImage(
-                    imagenMesa,
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
-                    BackgroundPosition.CENTER,
-                    new BackgroundSize(100, 100, true, true, true, true)
+                    imagenMesa, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
+                    BackgroundPosition.CENTER, new BackgroundSize(100, 100, true, true, true, true)
             );
             root.setBackground(new Background(bgMesa));
         } catch (Exception e) {
-            root.setStyle("-fx-background-color: #2b1d0c;");
+            root.setStyle("-fx-background-color: #1a1a1a;");
         }
 
-        // 2. Panel central de pergamino estilo Isaac
+        // 2. Panel central de pergamino con sombra
         VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
         panelPergamino.setMaxWidth(600);
-        panelPergamino.setMaxHeight(500);
+        panelPergamino.setMaxHeight(550);
         panelPergamino.setStyle(
                 "-fx-background-image: url('/assets/fondo/mplantilla2.jpg');" +
                         "-fx-background-size: stretch;" +
                         "-fx-padding: 40;"
         );
+        DropShadow sombraPergamino = new DropShadow(20, 10, 10, Color.color(0, 0, 0, 0.7));
+        panelPergamino.setEffect(sombraPergamino);
 
         Text titulo = new Text("Registro de Jugadores");
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 36));
         titulo.setFill(Color.web("#3b220b"));
+        titulo.setEffect(new DropShadow(2, 1, 1, Color.web("#ffffff")));
 
         // Formulario interno
-        VBox formulario = new VBox(15);
+        VBox formulario = new VBox(20);
         formulario.setAlignment(Pos.CENTER);
         formulario.setMaxWidth(400);
 
@@ -73,7 +77,7 @@ public class RegistroJugadores {
         Button btnVolver = crearBotonEstilizado("Volver");
         btnVolver.setOnAction(e -> gestor.mostrarMenuPrincipal());
 
-        HBox botones = new HBox(15, btnComenzar, btnVolver);
+        HBox botones = new HBox(20, btnComenzar, btnVolver);
         botones.setAlignment(Pos.CENTER);
 
         panelPergamino.getChildren().addAll(titulo, formulario, botones);
@@ -85,7 +89,7 @@ public class RegistroJugadores {
         hbox.setAlignment(Pos.CENTER);
 
         Label label = new Label(etiqueta);
-        label.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
+        label.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         label.setTextFill(Color.web("#3b220b"));
         label.setPrefWidth(100);
 
@@ -93,12 +97,16 @@ public class RegistroJugadores {
         input.setPromptText(placeholder);
         input.setFont(Font.font("Georgia", 14));
         input.setStyle(
-                "-fx-background-color: rgba(255, 255, 255, 0.7);" +
-                        "-fx-border-color: #5c3a18;" +
-                        "-fx-border-radius: 4;" +
-                        "-fx-padding: 8;"
+                "-fx-background-color: rgba(255, 255, 255, 0.85);" +
+                        "-fx-border-color: #5c3a18; -fx-border-width: 2;" +
+                        "-fx-border-radius: 5; -fx-background-radius: 5;" +
+                        "-fx-padding: 10;"
         );
-        input.setPrefWidth(220);
+        input.setPrefWidth(240);
+
+        // Sombra suave en el input
+        DropShadow sombraInput = new DropShadow(3, Color.color(0,0,0,0.2));
+        input.setEffect(sombraInput);
 
         hbox.getChildren().addAll(label, input);
         return hbox;
@@ -106,34 +114,28 @@ public class RegistroJugadores {
 
     private Button crearBotonEstilizado(String texto) {
         Button boton = new Button(texto);
-        boton.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
+        boton.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
         boton.setStyle(
                 "-fx-background-image: url('/assets/fondo/boton_borde.png');" +
                         "-fx-background-size: stretch;" +
                         "-fx-background-color: transparent;" +
                         "-fx-text-fill: #2c1808;" +
-                        "-fx-padding: 10 20;" +
+                        "-fx-padding: 12 25;" +
                         "-fx-cursor: hand;"
         );
-        boton.setPrefWidth(280);
-        boton.setPrefHeight(45);
+        boton.setPrefWidth(200);
+        boton.setPrefHeight(50);
+        boton.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
-        boton.setOnMouseEntered(e -> boton.setStyle(
-                "-fx-background-image: url('/assets/fondo/boton_borde.png');" +
-                        "-fx-background-size: stretch;" +
-                        "-fx-background-color: rgba(255, 255, 255, 0.2);" +
-                        "-fx-text-fill: #000000;" +
-                        "-fx-padding: 10 20;" +
-                        "-fx-cursor: hand;"
-        ));
-        boton.setOnMouseExited(e -> boton.setStyle(
-                "-fx-background-image: url('/assets/fondo/boton_borde.png');" +
-                        "-fx-background-size: stretch;" +
-                        "-fx-background-color: transparent;" +
-                        "-fx-text-fill: #2c1808;" +
-                        "-fx-padding: 10 20;" +
-                        "-fx-cursor: hand;"
-        ));
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), boton);
+        boton.setOnMouseEntered(e -> {
+            st.setToX(1.05); st.setToY(1.05); st.play();
+            boton.setStyle(boton.getStyle().replace("transparent", "rgba(255, 255, 255, 0.2)"));
+        });
+        boton.setOnMouseExited(e -> {
+            st.setToX(1.0); st.setToY(1.0); st.play();
+            boton.setStyle(boton.getStyle().replace("rgba(255, 255, 255, 0.2)", "transparent"));
+        });
 
         return boton;
     }
@@ -143,12 +145,13 @@ public class RegistroJugadores {
         String nombre2 = inputJugador2.getText().trim();
 
         if (nombre1.isEmpty() || nombre2.isEmpty()) {
-            System.out.println("Por favor, ingresa ambos nombres.");
+            inputJugador1.setStyle(inputJugador1.getStyle() + "-fx-border-color: red;");
+            inputJugador2.setStyle(inputJugador2.getStyle() + "-fx-border-color: red;");
             return;
         }
 
         if (nombre1.equals(nombre2)) {
-            System.out.println("Los nombres deben ser diferentes.");
+            inputJugador2.setStyle(inputJugador2.getStyle() + "-fx-border-color: red;");
             return;
         }
 

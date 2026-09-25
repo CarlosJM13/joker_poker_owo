@@ -2,8 +2,7 @@ public class MotorPuntaje {
 
     private jokerComunal comunal = new jokerComunal();
 
-    public ResultadoMano calcularJugadaConDetalle(Carta[] centro, Carta[] cartasJugador, Joker[] jokersActivos, int nivelRecursividad) {
-        Carta[] jugadaCompleta = new Carta[7];
+    public ResultadoMano calcularJugadaConDetalle(Carta[] centro, Carta[] cartasJugador, Joker[] jokersActivos, int nivelRecursividad, String efecto) {        Carta[] jugadaCompleta = new Carta[7];
         System.arraycopy(centro, 0, jugadaCompleta, 0, 5);
         System.arraycopy(cartasJugador, 0, jugadaCompleta, 5, 2);
 
@@ -33,6 +32,10 @@ public class MotorPuntaje {
 
         int totalFichas = fichasBase;
         int totalMulti = multiBase;
+
+        if (Partida.DEBUFF_COLOR_MITAD.equals(efecto) && nombreMano.contains("Color")) totalFichas /= 2;
+        if (Partida.DEBUFF_FULLHOUSE_MITAD.equals(efecto) && nombreMano.equals("Full House")) totalFichas /= 2;
+        if (Partida.DEBUFF_PAR_INHABILITADO.equals(efecto) && nombreMano.equals("Par")) { fichasBase = 5; multiBase = 1; totalFichas = 5; totalMulti = 1; }
 
         ColaPrioridad calculoPuntaje = new ColaPrioridad();
         if (jokersActivos != null) {

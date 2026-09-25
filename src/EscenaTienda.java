@@ -1,13 +1,17 @@
+import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.image.Image;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.util.Duration;
 
 public class EscenaTienda {
     private StackPane root;
@@ -40,69 +44,70 @@ public class EscenaTienda {
             Image imagenMesa = new Image(EscenaTienda.class.getResourceAsStream("/assets/fondo/mesa.jpg"));
             root.setBackground(new Background(new BackgroundImage(imagenMesa, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, new BackgroundSize(100, 100, true, true, true, true))));
         } catch (Exception e) {
-            root.setStyle("-fx-background-color: #2b1d0c;");
+            root.setStyle("-fx-background-color: #1a1a1a;");
         }
-
 
         VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
-        panelPergamino.setMaxWidth(880);
-        panelPergamino.setMaxHeight(620);
+        panelPergamino.setMaxWidth(950);
+        panelPergamino.setMaxHeight(650);
         panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 40;");
 
+        // Sombra del pergamino
+        DropShadow sombraPergamino = new DropShadow(20, 10, 10, Color.color(0, 0, 0, 0.7));
+        panelPergamino.setEffect(sombraPergamino);
+
         Label titulo = new Label("TIENDA DE MEJORAS — " + jugador.getNombre().toUpperCase());
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 22));
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 26));
         titulo.setTextFill(Color.web("#3b220b"));
+        DropShadow sombraTexto = new DropShadow(2, 1, 1, Color.web("#ffffff"));
+        titulo.setEffect(sombraTexto);
 
         textSaldo = new Label("Saldo disponible: $" + jugador.getDolares() + " Dólares");
-        textSaldo.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
+        textSaldo.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         textSaldo.setTextFill(Color.web("#7a5230"));
 
-        HBox contenedorOpciones = new HBox(25);
+        HBox contenedorOpciones = new HBox(20);
         contenedorOpciones.setAlignment(Pos.CENTER);
 
-        // Opción 1: Duplicar mano (Usamos JokerManox2.png)
         VBox op1 = crearOpcionTienda("3 DÓLARES", "Duplicar tu mano\nrecién jugada", "#8b4513", "/assets/jokers/JokerManox2.png");
         op1.setOnMouseClicked(e -> {
             boolean exito = tiendaLogica.comprarDuplicarMano(jugador);
             actualizarSaldo(exito, "¡Mano duplicada!");
         });
 
-        // Opción 2: Comodín Rojo (Usamos JokerCartasR.png)
         VBox op2 = crearOpcionTienda("3 DÓLARES", "Comprar comodín para\ncartas rojas", "#a42a2a", "/assets/jokers/JokerCartasR.png");
         op2.setOnMouseClicked(e -> {
             boolean exito = tiendaLogica.comprarComodin(gestor, numJugador, "rojo");
             actualizarSaldo(exito, "¡Comodín rojo adquirido!");
         });
 
-        // Opción 3: Comodín Negro (Usamos JokerCartasN.png)
         VBox op3 = crearOpcionTienda("3 DÓLARES", "Comprar comodín para\ncartas negras", "#1e1e1e", "/assets/jokers/JokerCartasN.png");
         op3.setOnMouseClicked(e -> {
             boolean exito = tiendaLogica.comprarComodin(gestor, numJugador, "negro");
             actualizarSaldo(exito, "¡Comodín negro adquirido!");
         });
-        //
-        //PARRA CHECA ESTA PARTE DEL CODIGO PARA QUE PUEDEAS IMPLEMENTAR LA NUEVA PANTALLA DE MEJORA
-        // Agregar en crearUI() de EscenaTienda.java, debajo de op3
-        VBox op4 = crearOpcionTienda("2 DÓLARES", "Evolucionar cartas\nen el Árbol", "#2e8b57", "/assets/jokers/JokerCartasN.png");
 
+        VBox op4 = crearOpcionTienda("3 DÓLARES", "Evolucionar cartas\nen el Árbol", "#2e8b57", "/assets/jokers/JokerCartasN.png");
         op4.setOnMouseClicked(e -> {
-            // Definimos cómo regresar a esta misma tienda después de la mejora
             Runnable volverATienda = () -> EscenaTienda.mostrar(gestor, numJugador, onTiendaCompleta);
-
             boolean exito = tiendaLogica.comprarMejoraArbol(gestor, numJugador, volverATienda);
             if (!exito) {
                 actualizarSaldo(false, "Fondos insuficientes");
             }
         });
 
-// NO OLVIDAR actualizar el HBox para incluir op4
         contenedorOpciones.getChildren().addAll(op1, op2, op3, op4);
 
-
         Button btnContinuar = new Button("Terminar Compras");
-        btnContinuar.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btnContinuar.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 30; -fx-cursor: hand;");
+        btnContinuar.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
+        btnContinuar.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 12 40; -fx-cursor: hand;");
+        btnContinuar.setEffect(sombraTexto);
+
+        ScaleTransition stBtn = new ScaleTransition(Duration.millis(150), btnContinuar);
+        btnContinuar.setOnMouseEntered(e -> { stBtn.setToX(1.05); stBtn.setToY(1.05); stBtn.play(); });
+        btnContinuar.setOnMouseExited(e -> { stBtn.setToX(1.0); stBtn.setToY(1.0); stBtn.play(); });
+
         btnContinuar.setOnAction(e -> {
             if (onTiendaCompleta != null) onTiendaCompleta.run();
         });
@@ -114,36 +119,51 @@ public class EscenaTienda {
     private VBox crearOpcionTienda(String precio, String descripcion, String colorHex, String rutaImagen) {
         VBox opcion = new VBox(10);
         opcion.setAlignment(Pos.CENTER);
-        opcion.setStyle("-fx-cursor: hand; -fx-padding: 10; -fx-background-color: rgba(255, 250, 240, 0.85); -fx-border-color: " + colorHex + "; -fx-border-radius: 6; -fx-background-radius: 6; -fx-border-width: 1.5;");
-        opcion.setPrefWidth(220);
-        opcion.setPrefHeight(250);
+        opcion.setStyle("-fx-cursor: hand; -fx-padding: 15; -fx-background-color: rgba(255, 250, 240, 0.9); -fx-border-color: " + colorHex + "; -fx-border-radius: 8; -fx-background-radius: 8; -fx-border-width: 2;");
+        opcion.setPrefWidth(200);
+        opcion.setPrefHeight(260);
 
-        // Renderizado de la imagen
-        javafx.scene.image.ImageView vistaImagen = new javafx.scene.image.ImageView();
+        // Sombra suave para la tarjeta
+        DropShadow sombraTarjeta = new DropShadow(5, 2, 2, Color.color(0,0,0,0.3));
+        opcion.setEffect(sombraTarjeta);
+
+        ImageView vistaImagen = new ImageView();
         try {
             Image img = new Image(EscenaTienda.class.getResourceAsStream(rutaImagen));
             vistaImagen.setImage(img);
             vistaImagen.setFitHeight(110);
             vistaImagen.setPreserveRatio(true);
-        } catch (Exception ex) {
-            System.out.println("Imagen no encontrada: " + rutaImagen);
-        }
+            DropShadow sombraImg = new DropShadow(5, Color.color(0,0,0,0.4));
+            vistaImagen.setEffect(sombraImg);
+        } catch (Exception ex) {}
 
         Label precioText = new Label(precio);
-        precioText.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
+        precioText.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         precioText.setTextFill(Color.web(colorHex));
 
         Label descText = new Label(descripcion);
-        descText.setFont(Font.font("Georgia", javafx.scene.text.FontPosture.ITALIC, 12));
+        descText.setFont(Font.font("Georgia", FontPosture.ITALIC, 13));
         descText.setTextFill(Color.web("#3b220b"));
         descText.setWrapText(true);
         descText.setAlignment(Pos.CENTER);
+        descText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         opcion.getChildren().addAll(vistaImagen, precioText, descText);
 
-        // Efecto hover
-        opcion.setOnMouseEntered(e -> opcion.setStyle("-fx-cursor: hand; -fx-padding: 10; -fx-background-color: rgba(255, 255, 255, 1); -fx-border-color: " + colorHex + "; -fx-border-width: 2.5; -fx-border-radius: 6; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 6, 0, 0, 3);"));
-        opcion.setOnMouseExited(e -> opcion.setStyle("-fx-cursor: hand; -fx-padding: 10; -fx-background-color: rgba(255, 250, 240, 0.85); -fx-border-color: " + colorHex + "; -fx-border-radius: 6; -fx-border-width: 1.5;"));
+        // Efecto hover y escala
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), opcion);
+
+        opcion.setOnMouseEntered(e -> {
+            st.setToX(1.05); st.setToY(1.05); st.play();
+            opcion.setStyle("-fx-cursor: hand; -fx-padding: 15; -fx-background-color: rgba(255, 255, 255, 1); -fx-border-color: " + colorHex + "; -fx-border-width: 3; -fx-border-radius: 8; -fx-background-radius: 8;");
+            opcion.setEffect(new DropShadow(15, Color.web(colorHex))); // Brillo del color de la carta
+        });
+
+        opcion.setOnMouseExited(e -> {
+            st.setToX(1.0); st.setToY(1.0); st.play();
+            opcion.setStyle("-fx-cursor: hand; -fx-padding: 15; -fx-background-color: rgba(255, 250, 240, 0.9); -fx-border-color: " + colorHex + "; -fx-border-radius: 8; -fx-background-radius: 8; -fx-border-width: 2;");
+            opcion.setEffect(sombraTarjeta);
+        });
 
         return opcion;
     }
@@ -151,13 +171,12 @@ public class EscenaTienda {
     private void actualizarSaldo(boolean exito, String mensajeExito) {
         if (exito) {
             textSaldo.setText("Saldo disponible: $" + jugador.getDolares() + " (" + mensajeExito + ")");
-            textSaldo.setTextFill(javafx.scene.paint.Color.web("#2d6a4f"));
+            textSaldo.setTextFill(Color.web("#2d6a4f"));
         } else {
             textSaldo.setText("Saldo disponible: $" + jugador.getDolares() + " (Fondos insuficientes)");
-            textSaldo.setTextFill(javafx.scene.paint.Color.web("#a42a2a"));
+            textSaldo.setTextFill(Color.web("#a42a2a"));
         }
     }
-
 
     public StackPane getRoot() {
         return root;

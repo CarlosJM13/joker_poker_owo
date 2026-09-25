@@ -1,21 +1,19 @@
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundSize;
-import javafx.scene.paint.Color;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class Ronda {
     }
 
     private static void ejecutarPaso1(GestorEscenas gestor) {
-        PantallaTransicion.mostrar(gestor, "Turno del Jugador 1: Escoger carta de la baraja", () -> {
+        PantallaTransicion.mostrar(gestor, "Turno del Jugador 1: Escoger carta", () -> {
             pasoEscogerCartaPropia(gestor, 1, () -> ejecutarPaso2(gestor));
         });
     }
@@ -56,13 +54,13 @@ public class Ronda {
     }
 
     private static void ejecutarPaso4(GestorEscenas gestor) {
-        PantallaTransicion.mostrar(gestor, "Turno del Jugador 1: Escoger entre descartes del rival", () -> {
+        PantallaTransicion.mostrar(gestor, "Turno del Jugador 1: Descartes", () -> {
             pasoEscogerDeDescartes(gestor, 1, () -> ejecutarPaso5(gestor));
         });
     }
 
     private static void ejecutarPaso5(GestorEscenas gestor) {
-        PantallaTransicion.mostrar(gestor, "Turno del Jugador 2: Escoger entre descartes del rival", () -> {
+        PantallaTransicion.mostrar(gestor, "Turno del Jugador 2: Descartes", () -> {
             pasoEscogerDeDescartes(gestor, 2, () -> ejecutarPaso6(gestor));
         });
     }
@@ -75,6 +73,58 @@ public class Ronda {
         pasoDestape(gestor, () -> pasoEvaluacion(gestor));
     }
 
+    // --- MÉTODOS VISUALES REUTILIZABLES ---
+    private static Button crearBotonPremium(String texto) {
+        Button boton = new Button(texto);
+        boton.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
+        String estiloBase = "-fx-background-color: linear-gradient(#5c3a18, #2b1d0c); -fx-text-fill: #FFD700; -fx-padding: 10 25; -fx-border-color: #FFD700; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;";
+        String estiloHover = "-fx-background-color: linear-gradient(#8b4513, #5c3a18); -fx-text-fill: #FFFFFF; -fx-padding: 10 25; -fx-border-color: #FFD700; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;";
+
+        boton.setStyle(estiloBase);
+        boton.setEffect(new DropShadow(5, Color.BLACK));
+
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), boton);
+        boton.setOnMouseEntered(e -> { st.setToX(1.05); st.setToY(1.05); st.play(); boton.setStyle(estiloHover); });
+        boton.setOnMouseExited(e -> { st.setToX(1.0); st.setToY(1.0); st.play(); boton.setStyle(estiloBase); });
+        return boton;
+    }
+
+    private static void aplicarEfectoCarta(ImageView vistaCarta) {
+        DropShadow sombraNormal = new DropShadow(10, 5, 5, Color.color(0,0,0,0.6));
+        DropShadow sombraHover = new DropShadow(20, Color.web("#FFD700"));
+        vistaCarta.setEffect(sombraNormal);
+
+        ScaleTransition st = new ScaleTransition(Duration.millis(150), vistaCarta);
+        vistaCarta.setOnMouseEntered(e -> {
+            st.setToX(1.1); st.setToY(1.1); st.play();
+            vistaCarta.setEffect(sombraHover);
+            vistaCarta.setCursor(javafx.scene.Cursor.HAND);
+        });
+        vistaCarta.setOnMouseExited(e -> {
+            st.setToX(1.0); st.setToY(1.0); st.play();
+            vistaCarta.setEffect(sombraNormal);
+        });
+    }
+
+    // 🌟 LA MAGIA DE LA REPARTICIÓN (Cartas Voladoras) 🌟
+    private static void animarEntradaCarta(ImageView vistaCarta, int delayMillis) {
+        // Empiezan 300 pixeles arriba y transparentes
+        vistaCarta.setTranslateY(-300);
+        vistaCarta.setOpacity(0);
+
+        TranslateTransition caida = new TranslateTransition(Duration.millis(600), vistaCarta);
+        caida.setToY(0);
+        caida.setDelay(Duration.millis(delayMillis));
+
+        FadeTransition aparicion = new FadeTransition(Duration.millis(600), vistaCarta);
+        aparicion.setToValue(1.0);
+        aparicion.setDelay(Duration.millis(delayMillis));
+
+        caida.play();
+        aparicion.play();
+    }
+    // ----------------------------------------
+
     private static void mostrarAnuncioDebuff(GestorEscenas gestor, String efecto, Runnable continuar) {
         StackPane raiz = new StackPane();
         try {
@@ -84,25 +134,25 @@ public class Ronda {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox pergamino = new VBox(20);
+        VBox pergamino = new VBox(25);
         pergamino.setAlignment(Pos.CENTER);
         pergamino.setMaxWidth(750);
         pergamino.setMaxHeight(450);
         pergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 40;");
+        pergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
-        Label titulo = new Label("¡ADVERTENCIA: CIEGA ESPECIAL!");
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 22));
+        Label titulo = new Label("¡CIEGA ESPECIAL!");
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 36));
         titulo.setTextFill(Color.web("#a42a2a"));
+        titulo.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
         Label desc = new Label(efecto);
-        desc.setFont(Font.font("Georgia", FontPosture.ITALIC, 16));
+        desc.setFont(Font.font("Georgia", FontPosture.ITALIC, 20));
         desc.setTextFill(Color.web("#3b220b"));
         desc.setWrapText(true);
         desc.setStyle("-fx-text-alignment: center;");
 
-        Button btnContinuar = new Button("Aceptar Desafío");
-        btnContinuar.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btnContinuar.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 30; -fx-cursor: hand;");
+        Button btnContinuar = crearBotonPremium("Aceptar Desafío");
         btnContinuar.setOnAction(e -> continuar.run());
 
         pergamino.getChildren().addAll(titulo, desc, btnContinuar);
@@ -113,95 +163,75 @@ public class Ronda {
     private static void pasoEscogerCartaPropia(GestorEscenas gestor, int numJugador, Runnable continuar) {
         Partida partida = gestor.getPartida();
         Jugador jugador = numJugador == 1 ? partida.getJugador1() : partida.getJugador2();
-
         List<Carta> barajaCompartida = partida.getBarajaComun();
         Pila descartesPropios = numJugador == 1 ? partida.getDescartesJ1() : partida.getDescartesJ2();
 
         ListaSimple opciones = new ListaSimple();
         int cantidadAMostrar = Math.min(3, barajaCompartida.size());
         for (int i = 0; i < cantidadAMostrar; i++) {
-            Carta carta = barajaCompartida.remove(0);
-            opciones.agregarCarta(carta);
+            opciones.agregarCarta(barajaCompartida.remove(0));
         }
 
         StackPane raiz = new StackPane();
         try {
             Image imagenMesa = new Image(Ronda.class.getResourceAsStream("/assets/fondo/mesa.jpg"));
-            BackgroundImage bgMesa = new BackgroundImage(
-                    imagenMesa,
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT,
-                    BackgroundPosition.CENTER,
-                    new BackgroundSize(100, 100, true, true, true, true)
-            );
-            raiz.setBackground(new Background(bgMesa));
+            raiz.setBackground(new Background(new BackgroundImage(imagenMesa, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, new BackgroundSize(100, 100, true, true, true, true))));
         } catch (Exception e) {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox panelPergamino = new VBox(20);
+        VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
-        panelPergamino.setMaxWidth(750);
-        panelPergamino.setMaxHeight(550);
-        panelPergamino.setStyle(
-                "-fx-background-image: url('/assets/fondo/mplantilla2.jpg');" +
-                        "-fx-background-size: stretch;" +
-                        "-fx-padding: 30;"
-        );
+        panelPergamino.setMaxWidth(800);
+        panelPergamino.setMaxHeight(600);
+        panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 30;");
+        panelPergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
-        Label titulo = new Label("Jugador " + numJugador + ": Escoge UNA carta para conservar");
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 20));
+        Label titulo = new Label("Jugador " + numJugador + ": Escoge UNA carta");
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 28));
         titulo.setTextFill(Color.web("#3b220b"));
+        titulo.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
-        HBox contenedorCartas = new HBox(25);
+        HBox contenedorCartas = new HBox(40);
         contenedorCartas.setAlignment(Pos.CENTER);
+        contenedorCartas.setStyle("-fx-padding: 20;");
 
         int totalOpciones = opciones.getTamaño();
+        int delayAnimacion = 0; // Para que caigan una por una
+
         for (int i = 1; i <= totalOpciones; i++) {
             final int indiceElegido = i;
             Carta carta = opciones.obtenerCarta(i);
 
-            VBox tarjetaOpcion = new VBox(10);
+            VBox tarjetaOpcion = new VBox(15);
             tarjetaOpcion.setAlignment(Pos.CENTER);
 
             ImageView vistaCarta = new ImageView();
+            vistaCarta.setFitWidth(130);
+            vistaCarta.setFitHeight(180);
+            vistaCarta.setPreserveRatio(true);
             try {
-                Image imgCarta = CargadorImagenes.cargarCarta(carta);
-                if (imgCarta != null) {
-                    vistaCarta.setImage(imgCarta);
-                }
+                CargadorImagenes.cargarCartaEnVista(vistaCarta, carta);
             } catch (Exception ex) {}
 
-            vistaCarta.setFitWidth(110);
-            vistaCarta.setFitHeight(160);
-            vistaCarta.setPreserveRatio(true);
+            aplicarEfectoCarta(vistaCarta);
+            animarEntradaCarta(vistaCarta, delayAnimacion); // Llama a la animación
+            delayAnimacion += 150; // La siguiente carta tarda 150ms más en caer
 
-            Button btnElegir = new Button("Elegir");
-            btnElegir.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
-            btnElegir.setStyle(
-                    "-fx-background-image: url('/assets/fondo/boton_borde.png');" +
-                            "-fx-background-size: stretch;" +
-                            "-fx-background-color: transparent;" +
-                            "-fx-text-fill: #2c1808;" +
-                            "-fx-padding: 8 20;" +
-                            "-fx-cursor: hand;"
-            );
-
+            Button btnElegir = crearBotonPremium("Elegir Carta");
             btnElegir.setOnAction(e -> {
-                if (carta != null) {
-                    jugador.getManoActual()[0] = carta;
-                }
-
+                if (carta != null) jugador.getManoActual()[0] = carta;
                 for (int j = 1; j <= totalOpciones; j++) {
                     if (j != indiceElegido) {
                         Carta cartaDescarte = opciones.obtenerCarta(j);
-                        if (cartaDescarte != null && descartesPropios != null) {
-                            descartesPropios.apilar(cartaDescarte);
-                        }
+                        if (cartaDescarte != null && descartesPropios != null) descartesPropios.apilar(cartaDescarte);
                     }
                 }
                 opciones.vaciar();
                 continuar.run();
             });
+
+            vistaCarta.setOnMouseClicked(e -> btnElegir.fire());
 
             tarjetaOpcion.getChildren().addAll(vistaCarta, btnElegir);
             contenedorCartas.getChildren().add(tarjetaOpcion);
@@ -209,28 +239,20 @@ public class Ronda {
 
         panelPergamino.getChildren().addAll(titulo, contenedorCartas);
         raiz.getChildren().add(panelPergamino);
-
         gestor.mostrar(new Scene(raiz, 1024, 768));
     }
 
     private static void pasoEscogerDeDescartes(GestorEscenas gestor, int numJugador, Runnable continuar) {
         Partida partida = gestor.getPartida();
-
         Jugador jugador = (numJugador == 1) ? partida.getJugador1() : partida.getJugador2();
-        Pila descartesActivos = (numJugador == 1) ? partida.getDescartesJ1() : partida.getDescartesJ2();
         Pila descartesRival = numJugador == 1 ? partida.getDescartesJ2() : partida.getDescartesJ1();
         List<Carta> barajaCompartida = partida.getBarajaComun();
 
         ListaSimple opciones = new ListaSimple();
-
         for (int i = 0; i < 2; i++) {
-            if (descartesRival != null && !descartesRival.estaVacia()) {
-                opciones.agregarCarta(descartesRival.desapilar());
-            } else if (!barajaCompartida.isEmpty()) {
-                opciones.agregarCarta(barajaCompartida.remove(0));
-            }
+            if (descartesRival != null && !descartesRival.estaVacia()) opciones.agregarCarta(descartesRival.desapilar());
+            else if (!barajaCompartida.isEmpty()) opciones.agregarCarta(barajaCompartida.remove(0));
         }
-
         while (opciones.getTamaño() < 3 && !barajaCompartida.isEmpty()) {
             opciones.agregarCarta(barajaCompartida.remove(0));
         }
@@ -243,55 +265,54 @@ public class Ronda {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox panelPergamino = new VBox(20);
+        VBox panelPergamino = new VBox(25);
         panelPergamino.setAlignment(Pos.CENTER);
         panelPergamino.setMaxWidth(850);
-        panelPergamino.setMaxHeight(550);
+        panelPergamino.setMaxHeight(600);
         panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 30;");
+        panelPergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
         Label titulo = new Label("Jugador " + numJugador + ": Escoge tu segunda carta");
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 18));
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 26));
         titulo.setTextFill(Color.web("#3b220b"));
+        titulo.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
-        HBox contenedorCartas = new HBox(25);
+        HBox contenedorCartas = new HBox(40);
         contenedorCartas.setAlignment(Pos.CENTER);
 
         int totalOpciones = opciones.getTamaño();
+        int delayAnimacion = 0; // Animación de caída
+
         for (int i = 1; i <= totalOpciones; i++) {
             final int indiceElegido = i;
             Carta carta = opciones.obtenerCarta(i);
 
-            VBox tarjetaOpcion = new VBox(10);
+            VBox tarjetaOpcion = new VBox(15);
             tarjetaOpcion.setAlignment(Pos.CENTER);
 
             ImageView vistaCarta = new ImageView();
+            vistaCarta.setFitWidth(130);
+            vistaCarta.setFitHeight(180);
+            vistaCarta.setPreserveRatio(true);
             try {
-                if (carta != null) {
-                    vistaCarta.setImage(CargadorImagenes.cargarCarta(carta));
-                }
+                CargadorImagenes.cargarCartaEnVista(vistaCarta, carta);
             } catch (Exception ex) {}
 
-            vistaCarta.setFitWidth(100);
-            vistaCarta.setFitHeight(145);
-            vistaCarta.setPreserveRatio(true);
+            aplicarEfectoCarta(vistaCarta);
+            animarEntradaCarta(vistaCarta, delayAnimacion);
+            delayAnimacion += 150;
 
-            Button btnElegir = new Button("Elegir");
-            btnElegir.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
-            btnElegir.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 8 20; -fx-cursor: hand;");
-
+            Button btnElegir = crearBotonPremium("Elegir Carta");
             btnElegir.setOnAction(e -> {
-                if (carta != null) {
-                    jugador.getManoActual()[1] = carta;
-                }
+                if (carta != null) jugador.getManoActual()[1] = carta;
                 Pila descartesPropios = numJugador == 1 ? partida.getDescartesJ1() : partida.getDescartesJ2();
                 for (int j = 1; j <= totalOpciones; j++) {
-                    if (j != indiceElegido) {
-                        descartesPropios.apilar(opciones.obtenerCarta(j));
-                    }
+                    if (j != indiceElegido) descartesPropios.apilar(opciones.obtenerCarta(j));
                 }
                 opciones.vaciar();
                 continuar.run();
             });
+            vistaCarta.setOnMouseClicked(e -> btnElegir.fire());
 
             tarjetaOpcion.getChildren().addAll(vistaCarta, btnElegir);
             contenedorCartas.getChildren().add(tarjetaOpcion);
@@ -320,34 +341,37 @@ public class Ronda {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox pergamino = new VBox(20);
+        VBox pergamino = new VBox(30);
         pergamino.setAlignment(Pos.CENTER);
-        pergamino.setMaxWidth(800);
+        pergamino.setMaxWidth(900);
         pergamino.setMaxHeight(550);
         pergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 30;");
+        pergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
         Label texto = new Label("Cartas en la Mesa Común");
-        texto.setFont(Font.font("Georgia", FontWeight.BOLD, 22));
+        texto.setFont(Font.font("Georgia", FontWeight.BOLD, 32));
         texto.setTextFill(Color.web("#3b220b"));
+        texto.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
-        HBox contenedorCartasMesa = new HBox(15);
+        HBox contenedorCartasMesa = new HBox(20);
         contenedorCartasMesa.setAlignment(Pos.CENTER);
 
-        List<Carta> mesa = partida.getMesaComun();
-        for (Carta c : mesa) {
+        int delayAnimacion = 0;
+        for (Carta c : partida.getMesaComun()) {
             ImageView vistaCarta = new ImageView();
-            try {
-                vistaCarta.setImage(CargadorImagenes.cargarCarta(c));
-            } catch (Exception ex) {}
-            vistaCarta.setFitWidth(95);
-            vistaCarta.setFitHeight(140);
+            vistaCarta.setFitWidth(120);
+            vistaCarta.setFitHeight(170);
             vistaCarta.setPreserveRatio(true);
+            try { CargadorImagenes.cargarCartaEnVista(vistaCarta, c); } catch (Exception ex) {}
+
+            aplicarEfectoCarta(vistaCarta);
+            animarEntradaCarta(vistaCarta, delayAnimacion);
+            delayAnimacion += 150; // Efecto Crupier
+
             contenedorCartasMesa.getChildren().add(vistaCarta);
         }
 
-        Button btn = new Button("Continuar");
-        btn.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btn.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
+        Button btn = crearBotonPremium("Continuar a la siguiente fase");
         btn.setOnAction(e -> continuar.run());
 
         pergamino.getChildren().addAll(texto, contenedorCartasMesa, btn);
@@ -357,7 +381,6 @@ public class Ronda {
 
     private static void pasoDestape(GestorEscenas gestor, Runnable continuar) {
         Partida partida = gestor.getPartida();
-
         Jugador j1 = partida.getJugador1();
         Jugador j2 = partida.getJugador2();
 
@@ -369,84 +392,94 @@ public class Ronda {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox panelPergamino = new VBox(15);
+        VBox panelPergamino = new VBox(20);
         panelPergamino.setAlignment(Pos.CENTER);
-        panelPergamino.setMaxWidth(920);
-        panelPergamino.setMaxHeight(650);
+        panelPergamino.setMaxWidth(950);
+        panelPergamino.setMaxHeight(700);
         panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 25;");
+        panelPergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
-        Label titulo = new Label("¡DESTAPE Y EVALUACIÓN DE LA MESA!");
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 20));
-        titulo.setTextFill(Color.web("#3b220b"));
+        Label titulo = new Label("¡DESTAPE DE LA MESA!");
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 30));
+        titulo.setTextFill(Color.web("#a42a2a"));
+        titulo.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
+        int delayAnimacion = 0; // Aquí llevaremos la cuenta de TODAS las cartas de la pantalla
+
+        VBox seccionCentral = new VBox(10);
+        seccionCentral.setAlignment(Pos.CENTER);
         Label labelMesa = new Label("Mesa Común");
-        labelMesa.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
+        labelMesa.setFont(Font.font("Georgia", FontWeight.BOLD, 18));
         labelMesa.setTextFill(Color.web("#5c3a18"));
 
-        HBox seccionMesa = new HBox(10);
+        HBox seccionMesa = new HBox(15);
         seccionMesa.setAlignment(Pos.CENTER);
-        List<Carta> centroLista = partida.getMesaComun();
-        if (centroLista != null) {
-            for (Carta c : centroLista) {
-                if (c != null) {
-                    ImageView imgView = new ImageView();
-                    try {
-                        imgView.setImage(CargadorImagenes.cargarCarta(c));
-                    } catch (Exception ex) {}
-                    imgView.setFitWidth(80);
-                    imgView.setFitHeight(115);
-                    imgView.setPreserveRatio(true);
-                    seccionMesa.getChildren().add(imgView);
-                }
+        for (Carta c : partida.getMesaComun()) {
+            if (c != null) {
+                ImageView imgView = new ImageView();
+                imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
+
+                aplicarEfectoCarta(imgView);
+                animarEntradaCarta(imgView, delayAnimacion);
+                delayAnimacion += 100; // Caen un poco más rápido aquí
+
+                seccionMesa.getChildren().add(imgView);
             }
         }
+        seccionCentral.getChildren().addAll(labelMesa, seccionMesa);
 
-        HBox manosJugadoresBox = new HBox(40);
+        HBox manosJugadoresBox = new HBox(60);
         manosJugadoresBox.setAlignment(Pos.CENTER);
+        manosJugadoresBox.setStyle("-fx-padding: 10 0;");
 
-        VBox boxJ1 = new VBox(5);
+        VBox boxJ1 = new VBox(10);
         boxJ1.setAlignment(Pos.CENTER);
         Label lblJ1 = new Label(j1.getNombre() + " (Mano)");
-        lblJ1.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+        lblJ1.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         lblJ1.setTextFill(Color.web("#3b220b"));
         HBox cartasJ1 = new HBox(10);
         cartasJ1.setAlignment(Pos.CENTER);
-        if (j1.getManoActual() != null) {
-            for (Carta c : j1.getManoActual()) {
-                if (c != null) {
-                    ImageView imgView = new ImageView();
-                    try { imgView.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
-                    imgView.setFitWidth(80); imgView.setFitHeight(115); imgView.setPreserveRatio(true);
-                    cartasJ1.getChildren().add(imgView);
-                }
+        for (Carta c : j1.getManoActual()) {
+            if (c != null) {
+                ImageView imgView = new ImageView();
+                imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
+
+                aplicarEfectoCarta(imgView);
+                animarEntradaCarta(imgView, delayAnimacion);
+                delayAnimacion += 100;
+
+                cartasJ1.getChildren().add(imgView);
             }
         }
         boxJ1.getChildren().addAll(lblJ1, cartasJ1);
 
-        VBox boxJ2 = new VBox(5);
+        VBox boxJ2 = new VBox(10);
         boxJ2.setAlignment(Pos.CENTER);
         Label lblJ2 = new Label(j2.getNombre() + " (Mano)");
-        lblJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+        lblJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         lblJ2.setTextFill(Color.web("#3b220b"));
         HBox cartasJ2 = new HBox(10);
         cartasJ2.setAlignment(Pos.CENTER);
-        if (j2.getManoActual() != null) {
-            for (Carta c : j2.getManoActual()) {
-                if (c != null) {
-                    ImageView imgView = new ImageView();
-                    try { imgView.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
-                    imgView.setFitWidth(80); imgView.setFitHeight(115); imgView.setPreserveRatio(true);
-                    cartasJ2.getChildren().add(imgView);
-                }
+        for (Carta c : j2.getManoActual()) {
+            if (c != null) {
+                ImageView imgView = new ImageView();
+                imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
+
+                aplicarEfectoCarta(imgView);
+                animarEntradaCarta(imgView, delayAnimacion);
+                delayAnimacion += 100;
+
+                cartasJ2.getChildren().add(imgView);
             }
         }
         boxJ2.getChildren().addAll(lblJ2, cartasJ2);
 
         manosJugadoresBox.getChildren().addAll(boxJ1, boxJ2);
 
-        Button btnMejorarJ1 = new Button("Usar Joker (" + j1.getNombre() + ")");
-        btnMejorarJ1.setFont(Font.font("Georgia", FontWeight.BOLD, 12));
-        btnMejorarJ1.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-cursor: hand; -fx-padding: 8 15;");
+        Button btnMejorarJ1 = crearBotonPremium("Usar Joker (" + j1.getNombre() + ")");
         btnMejorarJ1.setOnAction(e -> {
             List<Joker> jokersJ1 = partida.getJokersJ1();
             if (jokersJ1 != null && !jokersJ1.isEmpty()) {
@@ -462,9 +495,7 @@ public class Ronda {
             }
         });
 
-        Button btnMejorarJ2 = new Button("Usar Joker (" + j2.getNombre() + ")");
-        btnMejorarJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 12));
-        btnMejorarJ2.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-cursor: hand; -fx-padding: 8 15;");
+        Button btnMejorarJ2 = crearBotonPremium("Usar Joker (" + j2.getNombre() + ")");
         btnMejorarJ2.setOnAction(e -> {
             List<Joker> jokersJ2 = partida.getJokersJ2();
             if (jokersJ2 != null && !jokersJ2.isEmpty()) {
@@ -480,15 +511,13 @@ public class Ronda {
             }
         });
 
-        HBox botonesMejoraBox = new HBox(15, btnMejorarJ1, btnMejorarJ2);
+        HBox botonesMejoraBox = new HBox(20, btnMejorarJ1, btnMejorarJ2);
         botonesMejoraBox.setAlignment(Pos.CENTER);
 
-        Button btnContinuar = new Button("Evaluar Ronda");
-        btnContinuar.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btnContinuar.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
+        Button btnContinuar = crearBotonPremium("Evaluar Ronda");
         btnContinuar.setOnAction(e -> continuar.run());
 
-        panelPergamino.getChildren().addAll(titulo, labelMesa, seccionMesa, manosJugadoresBox, botonesMejoraBox, btnContinuar);
+        panelPergamino.getChildren().addAll(titulo, seccionCentral, manosJugadoresBox, botonesMejoraBox, btnContinuar);
         raiz.getChildren().add(panelPergamino);
         gestor.mostrar(new Scene(raiz, 1024, 768));
     }
@@ -499,27 +528,21 @@ public class Ronda {
         Jugador j2 = partida.getJugador2();
 
         Carta[] mesaComunArr = partida.getMesaComun().toArray(new Carta[0]);
-
         List<Carta> listaManoJ1 = new ArrayList<>();
-        for (Carta c : j1.getManoActual()) {
-            if (c != null) listaManoJ1.add(c);
-        }
-        Carta[] manoJ1Arr = listaManoJ1.toArray(new Carta[0]);
+        for (Carta c : j1.getManoActual()) if (c != null) listaManoJ1.add(c);
 
         List<Carta> listaManoJ2 = new ArrayList<>();
-        for (Carta c : j2.getManoActual()) {
-            if (c != null) listaManoJ2.add(c);
-        }
-        Carta[] manoJ2Arr = listaManoJ2.toArray(new Carta[0]);
+        for (Carta c : j2.getManoActual()) if (c != null) listaManoJ2.add(c);
 
-        Joker[] jokersJ1Arr = partida.getJokersJ1().toArray(new Joker[0]);
-        Joker[] jokersJ2Arr = partida.getJokersJ2().toArray(new Joker[0]);
         int nivelJoker = partida.nivelRecursividadJokerComunal();
+        if (Partida.DEBUFF_JOKER_COMUNAL_NULO.equals(partida.getEfectoRondaActual())) {
+            nivelJoker = 1;
+        }
 
         MotorPuntaje motor = new MotorPuntaje();
-        ResultadoMano resJ1 = motor.calcularJugadaConDetalle(mesaComunArr, manoJ1Arr, jokersJ1Arr, nivelJoker);
-        ResultadoMano resJ2 = motor.calcularJugadaConDetalle(mesaComunArr, manoJ2Arr, jokersJ2Arr, nivelJoker);
-
+        String efectoActual = partida.getEfectoRondaActual();
+        ResultadoMano resJ1 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ1.toArray(new Carta[0]), partida.getJokersJ1().toArray(new Joker[0]), nivelJoker, efectoActual);
+        ResultadoMano resJ2 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ2.toArray(new Carta[0]), partida.getJokersJ2().toArray(new Joker[0]), nivelJoker, efectoActual);
         long puntajeFinalJ1 = resJ1.getPuntajeFinal();
         long puntajeFinalJ2 = resJ2.getPuntajeFinal();
 
@@ -531,103 +554,81 @@ public class Ronda {
             raiz.setStyle("-fx-background-color: #2b1d0c;");
         }
 
-        VBox panelPergamino = new VBox(15);
+        VBox panelPergamino = new VBox(20);
         panelPergamino.setAlignment(Pos.CENTER);
         panelPergamino.setMaxWidth(920);
-        panelPergamino.setMaxHeight(620);
+        panelPergamino.setMaxHeight(650);
         panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 30;");
+        panelPergamino.setEffect(new DropShadow(20, 10, 10, Color.color(0,0,0,0.8)));
 
-        Label titulo = new Label("EVALUACIÓN DE LA RONDA " + partida.getNumeroRonda());
-        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 22));
+        Label titulo = new Label("EVALUACIÓN RONDA " + partida.getNumeroRonda());
+        titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 28));
         titulo.setTextFill(Color.web("#3b220b"));
 
-        // Obtenemos en qué ronda vamos
-        int rondaActual = partida.getNumeroRonda();
-
-        // Hacemos que la meta escale (150 en ronda 1, 300 en ronda 2, 450 en ronda 3...)
-        long metaFichas = 150L * rondaActual;
-
+        long metaFichas = 50L + (partida.getNumeroRonda() - 1) * 20L;
         Label lblMeta = new Label("Meta de Fichas Requerida: " + metaFichas);
-        lblMeta.setFont(Font.font("Georgia", FontWeight.BOLD, 15));
-        lblMeta.setTextFill(Color.web("#7a5230"));
-        HBox cuerpoPrincipal = new HBox(30);
+        lblMeta.setFont(Font.font("Georgia", FontWeight.BOLD, 18));
+        lblMeta.setTextFill(Color.web("#a42a2a"));
+
+        HBox cuerpoPrincipal = new HBox(40);
         cuerpoPrincipal.setAlignment(Pos.CENTER);
 
-        VBox guiaManosBox = new VBox(6);
+        VBox guiaManosBox = new VBox(8);
         guiaManosBox.setAlignment(Pos.CENTER_LEFT);
-        guiaManosBox.setStyle("-fx-background-color: rgba(92, 58, 24, 0.1); -fx-padding: 15; -fx-background-radius: 5;");
+        guiaManosBox.setStyle("-fx-background-color: rgba(92, 58, 24, 0.1); -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #5c3a18; -fx-border-radius: 8;");
 
         Label lblGuiaTitulo = new Label("VALORES DE MANOS");
-        lblGuiaTitulo.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+        lblGuiaTitulo.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
         lblGuiaTitulo.setTextFill(Color.web("#3b220b"));
+        guiaManosBox.getChildren().add(lblGuiaTitulo);
 
         String[] infoManos = {
-                "• Escalera Real: 100 Fichas x 8 Multi",
-                "• Full House: 40 Fichas x 4 Multi",
-                "• Color (Flush): 35 Fichas x 4 Multi",
-                "• Escalera: 30 Fichas x 4 Multi",
-                "• Trío: 30 Fichas x 3 Multi",
-                "• Doble Par: 20 Fichas x 2 Multi",
-                "• Par: 10 Fichas x 2 Multi",
-                "• Carta Alta: 5 Fichas x 1 Multi"
+                "• Escalera Real: 100 pts x 8", "• Full House: 40 pts x 4",
+                "• Color (Flush): 35 pts x 4", "• Escalera: 30 pts x 4",
+                "• Trío: 30 pts x 3", "• Doble Par: 20 pts x 2",
+                "• Par: 10 pts x 2", "• Carta Alta: 5 pts x 1"
         };
-
-        guiaManosBox.getChildren().add(lblGuiaTitulo);
         for (String textoMano : infoManos) {
             Label lblM = new Label(textoMano);
-            lblM.setFont(Font.font("Georgia", FontPosture.ITALIC, 11));
+            lblM.setFont(Font.font("Georgia", FontPosture.ITALIC, 12));
             lblM.setTextFill(Color.web("#5c3a18"));
             guiaManosBox.getChildren().add(lblM);
         }
 
-        VBox resultadosBox = new VBox(20);
+        VBox resultadosBox = new VBox(25);
         resultadosBox.setAlignment(Pos.CENTER);
+        resultadosBox.setStyle("-fx-background-color: rgba(255, 255, 255, 0.4); -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #5c3a18; -fx-border-radius: 8;");
+        resultadosBox.setEffect(new DropShadow(5, Color.color(0,0,0,0.2)));
 
-        VBox desgloseBox = new VBox(12);
-        desgloseBox.setAlignment(Pos.CENTER);
-
-        Label labelJ1 = new Label(j1.getNombre() + " hizo " + resJ1.getNombreMano() + " ➔ " + puntajeFinalJ1 + " fichas");
-        labelJ1.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+        Label labelJ1 = new Label(j1.getNombre() + " hizo " + resJ1.getNombreMano() + "\n➔ " + puntajeFinalJ1 + " fichas");
+        labelJ1.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         labelJ1.setTextFill(Color.web("#3b220b"));
+        labelJ1.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
-        Label labelJ2 = new Label(j2.getNombre() + " hizo " + resJ2.getNombreMano() + " ➔ " + puntajeFinalJ2 + " fichas");
-        labelJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+        Label labelJ2 = new Label(j2.getNombre() + " hizo " + resJ2.getNombreMano() + "\n➔ " + puntajeFinalJ2 + " fichas");
+        labelJ2.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         labelJ2.setTextFill(Color.web("#3b220b"));
-
+        labelJ2.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         boolean perdioJ1 = puntajeFinalJ1 < metaFichas;
         boolean perdioJ2 = puntajeFinalJ2 < metaFichas;
-
-        String resultadoPartida = (perdioJ1 || perdioJ2)
-                ? "¡Alerta! Un jugador no alcanzó la meta."
-                : "¡Excelente! Ambos superaron la meta.";
+        String resultadoPartida = (perdioJ1 || perdioJ2) ? "¡Alerta! Un jugador no alcanzó la meta." : "¡Excelente! Ambos superaron la meta.";
 
         Label lblResultado = new Label(resultadoPartida);
-        lblResultado.setFont(Font.font("Georgia", FontPosture.ITALIC, 13));
-        lblResultado.setTextFill(Color.web("#7a5230"));
+        lblResultado.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
+        lblResultado.setTextFill((perdioJ1 || perdioJ2) ? Color.web("#a42a2a") : Color.web("#2d6a4f"));
 
-        desgloseBox.getChildren().addAll(labelJ1, labelJ2, lblResultado);
-        resultadosBox.getChildren().add(desgloseBox);
-
+        resultadosBox.getChildren().addAll(labelJ1, labelJ2, lblResultado);
         cuerpoPrincipal.getChildren().addAll(guiaManosBox, resultadosBox);
 
-        // --- BOTONES FINALES ---
-        Button btnMenuPrincipal = new Button("Volver al Menú");
-        btnMenuPrincipal.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btnMenuPrincipal.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
+        Button btnMenuPrincipal = crearBotonPremium("Volver al Menú");
         btnMenuPrincipal.setOnAction(e -> gestor.mostrarMenuPrincipal());
 
-        Button btnSiguienteRonda = new Button("Siguiente Ronda / Tienda");
-        btnSiguienteRonda.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
-        btnSiguienteRonda.setStyle("-fx-background-image: url('/assets/fondo/boton_borde.png'); -fx-background-size: stretch; -fx-background-color: transparent; -fx-text-fill: #2c1808; -fx-padding: 10 25; -fx-cursor: hand;");
-
+        Button btnSiguienteRonda = crearBotonPremium("Siguiente Ronda / Tienda");
         btnSiguienteRonda.setOnAction(e -> {
-            if (perdioJ1 || perdioJ2) {
-                System.out.println("Fin del juego por no pasar la meta.");
-                // gestor.mostrarGameOver();
-            } else {
-                Tienda.iniciar(gestor);
-            }
+            partida.setResultadoUltimaRonda(perdioJ1, perdioJ2, puntajeFinalJ1, puntajeFinalJ2);
+            if (perdioJ1 || perdioJ2) gestor.mostrarGameOver();
+            else Tienda.iniciar(gestor);
         });
 
         HBox botonesBox = new HBox(20, btnMenuPrincipal, btnSiguienteRonda);
@@ -635,20 +636,12 @@ public class Ronda {
 
         if (partida.getHistorialRondas() != null) {
             partida.getHistorialRondas().agregar(
-                    j1.getNombre(),
-                    resJ1.getNombreMano(),
-                    String.valueOf(puntajeFinalJ1),
-                    !perdioJ1,
-                    j2.getNombre(),
-                    resJ2.getNombreMano(),
-                    String.valueOf(puntajeFinalJ2),
-                    !perdioJ2,
-                    (int) metaFichas
+                    j1.getNombre(), resJ1.getNombreMano(), String.valueOf(puntajeFinalJ1), !perdioJ1,
+                    j2.getNombre(), resJ2.getNombreMano(), String.valueOf(puntajeFinalJ2), !perdioJ2, (int) metaFichas
             );
         }
 
         panelPergamino.getChildren().addAll(titulo, lblMeta, cuerpoPrincipal, botonesBox);
-
         raiz.getChildren().add(panelPergamino);
         gestor.mostrar(new Scene(raiz, 1024, 768));
     }
