@@ -102,6 +102,12 @@ public class Partida {
         this.numeroRonda++;
         this.mesaComun.clear();
 
+        if (numeroRonda % 3 == 0) {
+            this.efectoRondaActual = listaEfectos.avanzarEfecto();
+        } else {
+            this.efectoRondaActual = null;
+        }
+
         // Rellenar la baraja común con las cartas base usando tu método existente
         inicializarBarajaCompartida();
 
@@ -169,6 +175,25 @@ public class Partida {
     }
 
     // --- getters y setters ---
+
+    private boolean ultimaRondaPerdioJ1;
+    private boolean ultimaRondaPerdioJ2;
+    private long ultimaRondaPuntajeJ1;
+    private long ultimaRondaPuntajeJ2;
+
+    public void setResultadoUltimaRonda(boolean perdioJ1, boolean perdioJ2, long puntajeJ1, long puntajeJ2) {
+        this.ultimaRondaPerdioJ1 = perdioJ1;
+        this.ultimaRondaPerdioJ2 = perdioJ2;
+        this.ultimaRondaPuntajeJ1 = puntajeJ1;
+        this.ultimaRondaPuntajeJ2 = puntajeJ2;
+    }
+
+    public boolean isUltimaRondaPerdioJ1() { return ultimaRondaPerdioJ1; }
+    public boolean isUltimaRondaPerdioJ2() { return ultimaRondaPerdioJ2; }
+    public long getUltimaRondaPuntajeJ1() { return ultimaRondaPuntajeJ1; }
+    public long getUltimaRondaPuntajeJ2() { return ultimaRondaPuntajeJ2; }
+
+
 
     public Jugador getJugador1() { return jugador1; }
     public void setJugador1(Jugador jugador1) { this.jugador1 = jugador1; }

@@ -1,4 +1,5 @@
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.io.InputStream;
 
 public class CargadorImagenes {
@@ -25,6 +26,25 @@ public class CargadorImagenes {
         }
 
         return new Image(is);
+    }
+
+    /**
+     * Carga la imagen de la carta en el ImageView y, si la carta está
+     * marcada como holográfica (ver Carta.setHolografica), le aplica el
+     * brillo arcoíris animado. Llama a esto en vez de setImage(cargarCarta(...))
+     * en cualquier lugar donde se dibuje una carta en pantalla.
+     *
+     * IMPORTANTE: llama a este método DESPUÉS de setFitWidth/setFitHeight
+     * en el ImageView, para que el holograma use el tamaño real de la carta.
+     */
+    public static void cargarCartaEnVista(ImageView vista, Carta carta) {
+        if (carta == null) return;
+        vista.setImage(cargarCarta(carta));
+        if (carta.isHolografica()) {
+            double ancho = vista.getFitWidth() > 0 ? vista.getFitWidth() : 130;
+            double alto = vista.getFitHeight() > 0 ? vista.getFitHeight() : 180;
+            EfectosVisuales.aplicarHolografico(vista, ancho, alto);
+        }
     }
 
     private static String generarNombreArchivo(Carta carta) {

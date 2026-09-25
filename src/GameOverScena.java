@@ -99,14 +99,25 @@ public class GameOverScena {
         ganador.setFont(Font.font("Georgia", FontWeight.BOLD, 20));
         ganador.setFill(Color.web("#2d6a4f")); // Verde victoria
 
-        // Criterio de victoria por dinero (o lo puedes cambiar a fichas)
-        if (j1.getDolares() > j2.getDolares()) {
-            ganador.setText("¡" + j1.getNombre() + " HA GANADO!");
-        } else if (j2.getDolares() > j1.getDolares()) {
-            ganador.setText("¡" + j2.getNombre() + " HA GANADO!");
+        boolean perdioJ1 = partida.isUltimaRondaPerdioJ1();
+        boolean perdioJ2 = partida.isUltimaRondaPerdioJ2();
+
+        if (perdioJ1 && !perdioJ2) {
+            ganador.setText("¡" + j2.getNombre() + " HA GANADO! (llegó más lejos)");
+        } else if (perdioJ2 && !perdioJ1) {
+            ganador.setText("¡" + j1.getNombre() + " HA GANADO! (llegó más lejos)");
         } else {
-            ganador.setText("¡ES UN EMPATE!");
-            ganador.setFill(Color.web("#5c3a18"));
+            // Ambos se ponchan en la misma ronda -> desempate por fichas de esa ronda
+            long fJ1 = partida.getUltimaRondaPuntajeJ1();
+            long fJ2 = partida.getUltimaRondaPuntajeJ2();
+            if (fJ1 > fJ2) {
+                ganador.setText("¡" + j1.getNombre() + " HA GANADO! (más fichas)");
+            } else if (fJ2 > fJ1) {
+                ganador.setText("¡" + j2.getNombre() + " HA GANADO! (más fichas)");
+            } else {
+                ganador.setText("¡ES UN EMPATE!");
+                ganador.setFill(Color.web("#5c3a18"));
+            }
         }
 
         resumen.getChildren().addAll(j1Info, j2Info, ganador);

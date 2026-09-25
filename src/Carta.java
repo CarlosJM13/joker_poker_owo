@@ -12,6 +12,7 @@ public class Carta {
     private boolean comunitaria;
     private int fichaAzules;
     private int multiRojo;
+    private boolean holografica = false;
 
     // Atributo para rastrear el nivel de evolucion en el arbol
     public NodoArbol nivelActual;
@@ -65,4 +66,7 @@ public class Carta {
     public boolean esNegra() {
         return palo.equalsIgnoreCase("trebol") || palo.equalsIgnoreCase("pica");
     }
+
+    public boolean isHolografica() { return holografica; }
+    public void setHolografica(boolean holografica) { this.holografica = holografica; }
 }

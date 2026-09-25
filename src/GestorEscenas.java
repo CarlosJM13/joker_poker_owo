@@ -18,6 +18,8 @@ public class GestorEscenas {
         javafx.scene.Parent root = scene.getRoot();
         root.setOpacity(0); // Inicia invisible
 
+        EfectosVisuales.aplicarCRT(root); // Efecto de pantalla retro en TODAS las escenas
+
         javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(javafx.util.Duration.millis(500), root);
         ft.setFromValue(0.0);
         ft.setToValue(1.0); // Termina 100% visible

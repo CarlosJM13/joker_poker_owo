@@ -14,7 +14,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -208,12 +207,12 @@ public class Ronda {
             tarjetaOpcion.setAlignment(Pos.CENTER);
 
             ImageView vistaCarta = new ImageView();
-            try {
-                if (carta != null) vistaCarta.setImage(CargadorImagenes.cargarCarta(carta));
-            } catch (Exception ex) {}
             vistaCarta.setFitWidth(130);
             vistaCarta.setFitHeight(180);
             vistaCarta.setPreserveRatio(true);
+            try {
+                CargadorImagenes.cargarCartaEnVista(vistaCarta, carta);
+            } catch (Exception ex) {}
 
             aplicarEfectoCarta(vistaCarta);
             animarEntradaCarta(vistaCarta, delayAnimacion); // Llama a la animación
@@ -292,12 +291,12 @@ public class Ronda {
             tarjetaOpcion.setAlignment(Pos.CENTER);
 
             ImageView vistaCarta = new ImageView();
-            try {
-                if (carta != null) vistaCarta.setImage(CargadorImagenes.cargarCarta(carta));
-            } catch (Exception ex) {}
             vistaCarta.setFitWidth(130);
             vistaCarta.setFitHeight(180);
             vistaCarta.setPreserveRatio(true);
+            try {
+                CargadorImagenes.cargarCartaEnVista(vistaCarta, carta);
+            } catch (Exception ex) {}
 
             aplicarEfectoCarta(vistaCarta);
             animarEntradaCarta(vistaCarta, delayAnimacion);
@@ -360,10 +359,10 @@ public class Ronda {
         int delayAnimacion = 0;
         for (Carta c : partida.getMesaComun()) {
             ImageView vistaCarta = new ImageView();
-            try { vistaCarta.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
             vistaCarta.setFitWidth(120);
             vistaCarta.setFitHeight(170);
             vistaCarta.setPreserveRatio(true);
+            try { CargadorImagenes.cargarCartaEnVista(vistaCarta, c); } catch (Exception ex) {}
 
             aplicarEfectoCarta(vistaCarta);
             animarEntradaCarta(vistaCarta, delayAnimacion);
@@ -418,8 +417,8 @@ public class Ronda {
         for (Carta c : partida.getMesaComun()) {
             if (c != null) {
                 ImageView imgView = new ImageView();
-                try { imgView.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
                 imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
 
                 aplicarEfectoCarta(imgView);
                 animarEntradaCarta(imgView, delayAnimacion);
@@ -444,8 +443,8 @@ public class Ronda {
         for (Carta c : j1.getManoActual()) {
             if (c != null) {
                 ImageView imgView = new ImageView();
-                try { imgView.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
                 imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
 
                 aplicarEfectoCarta(imgView);
                 animarEntradaCarta(imgView, delayAnimacion);
@@ -466,8 +465,8 @@ public class Ronda {
         for (Carta c : j2.getManoActual()) {
             if (c != null) {
                 ImageView imgView = new ImageView();
-                try { imgView.setImage(CargadorImagenes.cargarCarta(c)); } catch (Exception ex) {}
                 imgView.setFitWidth(90); imgView.setFitHeight(130); imgView.setPreserveRatio(true);
+                try { CargadorImagenes.cargarCartaEnVista(imgView, c); } catch (Exception ex) {}
 
                 aplicarEfectoCarta(imgView);
                 animarEntradaCarta(imgView, delayAnimacion);
@@ -536,10 +535,14 @@ public class Ronda {
         for (Carta c : j2.getManoActual()) if (c != null) listaManoJ2.add(c);
 
         int nivelJoker = partida.nivelRecursividadJokerComunal();
-        MotorPuntaje motor = new MotorPuntaje();
-        ResultadoMano resJ1 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ1.toArray(new Carta[0]), partida.getJokersJ1().toArray(new Joker[0]), nivelJoker);
-        ResultadoMano resJ2 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ2.toArray(new Carta[0]), partida.getJokersJ2().toArray(new Joker[0]), nivelJoker);
+        if (Partida.DEBUFF_JOKER_COMUNAL_NULO.equals(partida.getEfectoRondaActual())) {
+            nivelJoker = 1;
+        }
 
+        MotorPuntaje motor = new MotorPuntaje();
+        String efectoActual = partida.getEfectoRondaActual();
+        ResultadoMano resJ1 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ1.toArray(new Carta[0]), partida.getJokersJ1().toArray(new Joker[0]), nivelJoker, efectoActual);
+        ResultadoMano resJ2 = motor.calcularJugadaConDetalle(mesaComunArr, listaManoJ2.toArray(new Carta[0]), partida.getJokersJ2().toArray(new Joker[0]), nivelJoker, efectoActual);
         long puntajeFinalJ1 = resJ1.getPuntajeFinal();
         long puntajeFinalJ2 = resJ2.getPuntajeFinal();
 
@@ -562,8 +565,7 @@ public class Ronda {
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 28));
         titulo.setTextFill(Color.web("#3b220b"));
 
-        long metaFichas = 150L * partida.getNumeroRonda();
-
+        long metaFichas = 50L + (partida.getNumeroRonda() - 1) * 20L;
         Label lblMeta = new Label("Meta de Fichas Requerida: " + metaFichas);
         lblMeta.setFont(Font.font("Georgia", FontWeight.BOLD, 18));
         lblMeta.setTextFill(Color.web("#a42a2a"));
@@ -624,6 +626,7 @@ public class Ronda {
 
         Button btnSiguienteRonda = crearBotonPremium("Siguiente Ronda / Tienda");
         btnSiguienteRonda.setOnAction(e -> {
+            partida.setResultadoUltimaRonda(perdioJ1, perdioJ2, puntajeFinalJ1, puntajeFinalJ2);
             if (perdioJ1 || perdioJ2) gestor.mostrarGameOver();
             else Tienda.iniciar(gestor);
         });
