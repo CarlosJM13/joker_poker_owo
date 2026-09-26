@@ -333,6 +333,13 @@ public class Ronda {
             }
         }
 
+        // Cuando ya están las 5 cartas comunitarias sobre la mesa, las ordenamos
+        // de menor a mayor (Selection Sort) para que los jugadores identifiquen
+        // más fácil escaleras, pares, tríos, etc. y decidan si usar sus jokers.
+        if (partida.getMesaComun().size() == 5) {
+            OrdenadorCartas.ordenarPorValor(partida.getMesaComun());
+        }
+
         StackPane raiz = new StackPane();
         try {
             Image imgMesa = new Image(Ronda.class.getResourceAsStream("/assets/fondo/mesa.jpg"));
