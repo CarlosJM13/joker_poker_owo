@@ -75,12 +75,17 @@ public class CargadorImagenes {
     }
 
     public static Image cargarJoker(String tipo) {
+        // OJO: antes faltaba la subcarpeta "/jokers/" en las 3 rutas, así
+        // que getResourceAsStream siempre regresaba null y esto tronaba.
         if (tipo.equalsIgnoreCase("rojo")) {
-            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/JokerCartasR.png"));
+            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/jokers/JokerCartasR.png"));
         } else if (tipo.equalsIgnoreCase("negro")) {
-            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/JokerCartasN.png"));
+            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/jokers/JokerCartasN.png"));
+        } else if (tipo.equalsIgnoreCase("manox2")) {
+            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/jokers/JokerManox2.png"));
         } else {
-            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/JokerDebuff.png"));
+            // "comunal" y cualquier otro caso: ícono del Joker Comunal
+            return new Image(CargadorImagenes.class.getResourceAsStream("/assets/jokers/JokerDebuff.png"));
         }
     }
 }

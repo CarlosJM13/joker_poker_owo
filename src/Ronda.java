@@ -572,7 +572,7 @@ public class Ronda {
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 28));
         titulo.setTextFill(Color.web("#3b220b"));
 
-        long metaFichas = 50L + (partida.getNumeroRonda() - 1) * 20L;
+        long metaFichas = partida.getMetaFichas();
         Label lblMeta = new Label("Meta de Fichas Requerida: " + metaFichas);
         lblMeta.setFont(Font.font("Georgia", FontWeight.BOLD, 18));
         lblMeta.setTextFill(Color.web("#a42a2a"));
@@ -619,6 +619,15 @@ public class Ronda {
 
         boolean perdioJ1 = puntajeFinalJ1 < metaFichas;
         boolean perdioJ2 = puntajeFinalJ2 < metaFichas;
+
+        // Las rondas jefe son las que traen un efecto/debuff especial (cada
+        // 3 rondas). Si se gana una, el Joker Comunal sube 1 punto y desde
+        // la SIGUIENTE ronda repetirá la mano una vez más (tope de 5 veces).
+        boolean esRondaJefe = efectoActual != null;
+        if (esRondaJefe && !perdioJ1 && !perdioJ2) {
+            partida.getJokerComunal().sumarPunto();
+        }
+
         String resultadoPartida = (perdioJ1 || perdioJ2) ? "¡Alerta! Un jugador no alcanzó la meta." : "¡Excelente! Ambos superaron la meta.";
 
         Label lblResultado = new Label(resultadoPartida);
@@ -626,6 +635,36 @@ public class Ronda {
         lblResultado.setTextFill((perdioJ1 || perdioJ2) ? Color.web("#a42a2a") : Color.web("#2d6a4f"));
 
         resultadosBox.getChildren().addAll(labelJ1, labelJ2, lblResultado);
+
+        if (partida.jokerComunalVisible()) {
+            VBox jokerComunalBox = new VBox(8);
+            jokerComunalBox.setAlignment(Pos.CENTER);
+            jokerComunalBox.setMaxWidth(150);
+            jokerComunalBox.setStyle("-fx-background-color: rgba(122, 30, 30, 0.15); -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #7a1e1e; -fx-border-radius: 8;");
+
+            ImageView imgComunal = new ImageView();
+            try {
+                imgComunal.setImage(CargadorImagenes.cargarJoker("comunal"));
+            } catch (Exception ex) {}
+            imgComunal.setFitWidth(70);
+            imgComunal.setPreserveRatio(true);
+
+            Label lblComunalTitulo = new Label("JOKER COMUNAL");
+            lblComunalTitulo.setFont(Font.font("Georgia", FontWeight.BOLD, 13));
+            lblComunalTitulo.setTextFill(Color.web("#3b220b"));
+            lblComunalTitulo.setWrapText(true);
+            lblComunalTitulo.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+
+            Label lblComunalInfo = new Label("Repitió esta mano x" + nivelJoker + "\n(" + partida.getJokerComunal().getPuntos() + " ronda(s) jefe superada(s))");
+            lblComunalInfo.setFont(Font.font("Georgia", FontPosture.ITALIC, 11));
+            lblComunalInfo.setTextFill(Color.web("#5c3a18"));
+            lblComunalInfo.setWrapText(true);
+            lblComunalInfo.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+
+            jokerComunalBox.getChildren().addAll(imgComunal, lblComunalTitulo, lblComunalInfo);
+            cuerpoPrincipal.getChildren().add(jokerComunalBox); // a la izquierda de todo lo demás
+        }
+
         cuerpoPrincipal.getChildren().addAll(guiaManosBox, resultadosBox);
 
         Button btnMenuPrincipal = crearBotonPremium("Volver al Menú");

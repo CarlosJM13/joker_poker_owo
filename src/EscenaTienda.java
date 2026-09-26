@@ -53,9 +53,11 @@ public class EscenaTienda {
         panelPergamino.setMaxHeight(650);
         panelPergamino.setStyle("-fx-background-image: url('/assets/fondo/mplantilla2.jpg'); -fx-background-size: stretch; -fx-padding: 40;");
 
-        // Sombra del pergamino
-        DropShadow sombraPergamino = new DropShadow(20, 10, 10, Color.color(0, 0, 0, 0.7));
-        panelPergamino.setEffect(sombraPergamino);
+        // ✨ APLICAR CURVATURA AL PERGAMINO (sombra muy pronunciada + escala 3D)
+        EfectosVisuales.aplicarCurvatura(panelPergamino);
+
+        // ✨ APLICAR CLARIDAD SUPER FUERTE AL FONDO (mesa)
+        EfectosVisuales.aplicarClaridad(root);
 
         Label titulo = new Label("TIENDA DE MEJORAS — " + jugador.getNombre().toUpperCase());
         titulo.setFont(Font.font("Georgia", FontWeight.BOLD, 26));
