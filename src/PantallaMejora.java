@@ -1,6 +1,7 @@
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -12,22 +13,28 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.scene.text.FontPosture;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PantallaMejora {
     private StackPane root;
     private ArbolMejoras arbolMejoras;
     private Carta[] manoJugador;
-    private List<Carta> cartasSeleccionadas;
     private Runnable onMejoraCompleta;
-    private Label lblContador; // Para mostrar cuántas llevas
+    private Label lblContador; // Para mostrar cuántas mejoras llevas aplicadas
+
+    // Esta compra de $2 (comodín 4 / "Evolucionar cartas") da 2 usos, y cada
+    // uso se asigna a UNA carta con SU propio camino: por ejemplo, 1 carta
+    // para mejora azul y otra distinta para mejora roja, en vez de forzar
+    // el mismo camino a las 2 cartas como antes.
+    private static final int USOS_TOTALES = 3;
+    private int usosRestantes = USOS_TOTALES;
+
+    private Carta cartaSeleccionada; // la carta resaltada en este momento (o null)
+    private final java.util.Map<Carta, VBox> cajasPorCarta = new java.util.HashMap<>();
 
     public PantallaMejora(ArbolMejoras arbolMejoras, Carta[] manoJugador, Runnable onMejoraCompleta) {
         this.arbolMejoras = arbolMejoras;
         this.manoJugador = manoJugador;
         this.onMejoraCompleta = onMejoraCompleta;
-        this.cartasSeleccionadas = new ArrayList<>();
         crearUI();
     }
 
@@ -39,31 +46,51 @@ public class PantallaMejora {
         gestor.mostrar(new Scene(pantalla.getRoot(), 1024, 768));
     }
 
-    private void aplicarMejora(boolean esIzquierda, java.util.List<Carta> cartasSeleccionadas) {
-        if (cartasSeleccionadas.isEmpty()) {
-            lblContador.setText("¡ERROR: Selecciona al menos 1 carta!");
+    private void aplicarMejora(boolean esIzquierda) {
+        if (usosRestantes <= 0) {
+            return; // Ya no quedan usos, los botones deberían estar deshabilitados
+        }
+
+        if (cartaSeleccionada == null) {
+            lblContador.setText("¡Selecciona primero una carta!");
             lblContador.setTextFill(Color.web("#a42a2a")); // Rojo error
             return;
         }
 
-        if (cartasSeleccionadas.size() > 2) {
-            return; // Validado por la UI, pero por si acaso
+        Carta carta = cartaSeleccionada;
+        if (carta.nivelActual == null) {
+            carta.nivelActual = arbolMejoras.raiz;
+        }
+        NodoArbol siguienteNodo = esIzquierda ? carta.nivelActual.izquierdo : carta.nivelActual.derecho;
+
+        if (siguienteNodo != null) {
+            carta.setNivelEvolucion(siguienteNodo);
+            System.out.println(carta.getNombre() + " subió a: " + siguienteNodo.nivelEvolucion + " (" + (esIzquierda ? "mejora azul" : "mejora roja") + ")");
+        } else {
+            System.out.println(carta.getNombre() + " ya está en el nivel máximo.");
         }
 
-        for (Carta carta : cartasSeleccionadas) {
-            if (carta.nivelActual == null) {
-                carta.nivelActual = arbolMejoras.raiz;
-            }
-            NodoArbol siguienteNodo = esIzquierda ? carta.nivelActual.izquierdo : carta.nivelActual.derecho;
-
-            if (siguienteNodo != null) {
-                carta.setNivelEvolucion(siguienteNodo);
-                System.out.println(carta.getNombre() + " subió a: " + siguienteNodo.nivelEvolucion);
-            } else {
-                System.out.println(carta.getNombre() + " ya está en el nivel máximo.");
-            }
+        // Deja la carta marcada como "ya usada" en esta visita y libera la selección
+        VBox caja = cajasPorCarta.get(carta);
+        if (caja != null) {
+            caja.setStyle("-fx-border-color: " + (esIzquierda ? "#1e4c7a" : "#7a1e1e") + "; -fx-border-width: 3; -fx-border-radius: 5; -fx-padding: 5; -fx-opacity: 0.5;");
+            caja.setEffect(null);
+            caja.setDisable(true);
         }
+        cartaSeleccionada = null;
+        usosRestantes--;
 
+        if (usosRestantes <= 0) {
+            lblContador.setText("¡Mejoras completas!");
+            lblContador.setTextFill(Color.web("#2d6a4f"));
+            finalizar();
+        } else {
+            lblContador.setText("Mejoras aplicadas: " + (USOS_TOTALES - usosRestantes) + " / " + USOS_TOTALES + " (elige otra carta, por ejemplo para la otra rama)");
+            lblContador.setTextFill(Color.web("#5c3a18"));
+        }
+    }
+
+    private void finalizar() {
         if (onMejoraCompleta != null) {
             onMejoraCompleta.run();
         }
@@ -94,13 +121,12 @@ public class PantallaMejora {
                         "-fx-background-size: stretch;" +
                         "-fx-padding: 30;"
         );
-        // Sombra para que el pergamino flote
-        DropShadow sombraPergamino = new DropShadow();
-        sombraPergamino.setRadius(20);
-        sombraPergamino.setOffsetX(10);
-        sombraPergamino.setOffsetY(10);
-        sombraPergamino.setColor(Color.color(0, 0, 0, 0.7));
-        panelPergamino.setEffect(sombraPergamino);
+
+        // ✨ APLICAR CURVATURA AL PERGAMINO (sombra muy pronunciada + escala 3D)
+        EfectosVisuales.aplicarCurvatura(panelPergamino);
+
+        // ✨ APLICAR CLARIDAD SUPER FUERTE AL FONDO (mesa)
+        EfectosVisuales.aplicarClaridad(root);
 
         // Título con sombra
         Text titulo = new Text("EVOLUCIÓN DE CARTAS");
@@ -109,9 +135,11 @@ public class PantallaMejora {
         DropShadow sombraTexto = new DropShadow(3, 2, 2, Color.web("#ffffff"));
         titulo.setEffect(sombraTexto);
 
-        lblContador = new Label("Cartas seleccionadas: 0 / 2");
+        lblContador = new Label("Elige una carta y luego una rama (azul o roja). Tienes " + USOS_TOTALES + " mejoras disponibles.");
         lblContador.setFont(Font.font("Georgia", FontWeight.BOLD, 16));
         lblContador.setTextFill(Color.web("#5c3a18"));
+        lblContador.setWrapText(true);
+        lblContador.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         // --- ZONA DE SELECCIÓN DE CARTAS CON ANIMACIONES ---
         HBox zonaCartas = new HBox(40);
@@ -140,34 +168,44 @@ public class PantallaMejora {
                 ScaleTransition st = new ScaleTransition(Duration.millis(150), cajaCarta);
 
                 cajaCarta.setOnMouseEntered(e -> {
-                    if (!cartasSeleccionadas.contains(c)) {
+                    if (cartaSeleccionada != c) {
                         st.setToX(1.05); st.setToY(1.05); st.play();
                     }
                 });
                 cajaCarta.setOnMouseExited(e -> {
-                    if (!cartasSeleccionadas.contains(c)) {
+                    if (cartaSeleccionada != c) {
                         st.setToX(1.0); st.setToY(1.0); st.play();
                     }
                 });
 
                 cajaCarta.setOnMouseClicked(e -> {
-                    if (cartasSeleccionadas.contains(c)) {
-                        cartasSeleccionadas.remove(c);
+                    if (cajaCarta.isDisable()) return; // ya se usó en esta visita
+
+                    if (cartaSeleccionada == c) {
+                        // Vuelve a hacer click en la misma carta: la deselecciona
+                        cartaSeleccionada = null;
                         cajaCarta.setStyle("-fx-border-color: transparent; -fx-border-width: 3; -fx-padding: 5; -fx-cursor: hand;");
                         cajaCarta.setEffect(sombraCarta);
                         st.setToX(1.0); st.setToY(1.0); st.play();
-                    } else if (cartasSeleccionadas.size() < 2) {
-                        cartasSeleccionadas.add(c);
+                    } else {
+                        // Quita el resaltado de la carta que estuviera seleccionada antes
+                        if (cartaSeleccionada != null) {
+                            VBox cajaAnterior = cajasPorCarta.get(cartaSeleccionada);
+                            if (cajaAnterior != null) {
+                                cajaAnterior.setStyle("-fx-border-color: transparent; -fx-border-width: 3; -fx-padding: 5; -fx-cursor: hand;");
+                                cajaAnterior.setEffect(sombraCarta);
+                            }
+                        }
+                        cartaSeleccionada = c;
                         // Borde brillante y crece cuando se selecciona
                         cajaCarta.setStyle("-fx-border-color: #FFD700; -fx-border-width: 3; -fx-border-radius: 5; -fx-padding: 5; -fx-cursor: hand; -fx-background-color: rgba(255, 215, 0, 0.15);");
                         DropShadow glow = new DropShadow(20, Color.web("#FFD700"));
                         cajaCarta.setEffect(glow);
                         st.setToX(1.1); st.setToY(1.1); st.play();
                     }
-                    lblContador.setText("Cartas seleccionadas: " + cartasSeleccionadas.size() + " / 2");
-                    lblContador.setTextFill(Color.web("#5c3a18"));
                 });
 
+                cajasPorCarta.put(c, cajaCarta);
                 cajaCarta.getChildren().add(vistaCarta);
                 zonaCartas.getChildren().add(cajaCarta);
             }
@@ -175,7 +213,12 @@ public class PantallaMejora {
 
         VBox centro = crearArbol();
 
-        panelPergamino.getChildren().addAll(titulo, lblContador, zonaCartas, centro);
+        Button btnTerminar = new Button("Terminar mejoras");
+        btnTerminar.setFont(Font.font("Georgia", FontWeight.BOLD, 14));
+        btnTerminar.setStyle("-fx-background-color: linear-gradient(#5c3a18, #2b1d0c); -fx-text-fill: #FFD700; -fx-padding: 8 20; -fx-border-color: #FFD700; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;");
+        btnTerminar.setOnAction(e -> finalizar());
+
+        panelPergamino.getChildren().addAll(titulo, lblContador, zonaCartas, centro, btnTerminar);
         root.getChildren().add(panelPergamino);
     }
 
@@ -199,13 +242,13 @@ public class PantallaMejora {
         HBox ramaIzq = new HBox(20);
         ramaIzq.setAlignment(Pos.CENTER);
         // Usamos la textura de tus botones con colores adaptados
-        HBox nodoIzq = crearBotonMejora("✦ RAMA AZUL ✦\n+5 Fichas Base", "#1e4c7a");
-        nodoIzq.setOnMouseClicked(e -> aplicarMejora(true, cartasSeleccionadas));
+        HBox nodoIzq = crearBotonMejora("✦ RAMA AZUL ✦\n+5 Fichas Base\n(a la carta seleccionada)", "#1e4c7a");
+        nodoIzq.setOnMouseClicked(e -> aplicarMejora(true));
 
         HBox ramaDer = new HBox(20);
         ramaDer.setAlignment(Pos.CENTER);
-        HBox nodoDer = crearBotonMejora("✦ RAMA ROJA ✦\nx1.5 Multiplicador", "#7a1e1e");
-        nodoDer.setOnMouseClicked(e -> aplicarMejora(false, cartasSeleccionadas));
+        HBox nodoDer = crearBotonMejora("✦ RAMA ROJA ✦\nx1.5 Multiplicador\n(a la carta seleccionada)", "#7a1e1e");
+        nodoDer.setOnMouseClicked(e -> aplicarMejora(false));
 
         HBox ramas = new HBox(40);
         ramas.setAlignment(Pos.CENTER);

@@ -6,6 +6,7 @@ import javafx.scene.effect.Blend;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.ColorInput;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -21,6 +22,8 @@ import java.util.List;
  * Efectos visuales reutilizables:
  *  - CRT: overlay tipo pantalla retro (scanlines + viñeta) para toda la pantalla.
  *  - Holográfico: brillo arcoíris animado tipo carta "foil" de Balatro, por carta.
+ *  - Curvatura: efecto 3D tipo Balatro con sombra pronunciada.
+ *  - Claridad: aumenta contraste y brillo para mejor visibilidad.
  */
 public class EfectosVisuales {
 
@@ -28,19 +31,17 @@ public class EfectosVisuales {
 
     /** Aplica el efecto CRT a la raíz de una escena. Se llama una vez por Scene. */
     public static void aplicarCRT(Parent root) {
-        if (!(root instanceof Pane)) return; // todas las "raiz"/"root" del proyecto son StackPane, que es Pane
+        if (!(root instanceof Pane)) return;
         Pane panel = (Pane) root;
 
-        // Ligero tinte y oscurecido general, como monitor viejo
         ColorAdjust tinte = new ColorAdjust();
         tinte.setSaturation(-0.12);
         tinte.setBrightness(-0.03);
         tinte.setContrast(0.08);
         root.setEffect(tinte);
 
-        // Líneas de escaneo (scanlines) más gruesas y marcadas
         Region scanlines = new Region();
-        scanlines.setMouseTransparent(true); // para no bloquear clics de botones/cartas
+        scanlines.setMouseTransparent(true);
         scanlines.setStyle(
                 "-fx-background-color: linear-gradient(from 0px 0px to 0px 3px, repeat, " +
                         "rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.42) 50%, transparent 50%, transparent 100%);"
@@ -48,22 +49,20 @@ public class EfectosVisuales {
         scanlines.prefWidthProperty().bind(panel.widthProperty());
         scanlines.prefHeightProperty().bind(panel.heightProperty());
 
-        // Fleco de color en las orillas (imitación de aberración cromática de un tubo CRT)
         Region franjaRoja = new Region();
         franjaRoja.setMouseTransparent(true);
-        franjaRoja.setBlendMode(javafx.scene.effect.BlendMode.SCREEN);
+        franjaRoja.setBlendMode(BlendMode.SCREEN);
         franjaRoja.setStyle("-fx-background-color: linear-gradient(to right, rgba(255,0,60,0.18) 0%, transparent 6%, transparent 94%, rgba(255,0,60,0.18) 100%);");
         franjaRoja.prefWidthProperty().bind(panel.widthProperty());
         franjaRoja.prefHeightProperty().bind(panel.heightProperty());
 
         Region franjaCian = new Region();
         franjaCian.setMouseTransparent(true);
-        franjaCian.setBlendMode(javafx.scene.effect.BlendMode.SCREEN);
+        franjaCian.setBlendMode(BlendMode.SCREEN);
         franjaCian.setStyle("-fx-background-color: linear-gradient(to bottom, rgba(0,220,255,0.14) 0%, transparent 6%, transparent 94%, rgba(0,220,255,0.14) 100%);");
         franjaCian.prefWidthProperty().bind(panel.widthProperty());
         franjaCian.prefHeightProperty().bind(panel.heightProperty());
 
-        // Viñeta oscura en las orillas, como un tubo CRT curvo
         Region vineta = new Region();
         vineta.setMouseTransparent(true);
         vineta.setStyle(
@@ -74,7 +73,6 @@ public class EfectosVisuales {
 
         panel.getChildren().addAll(franjaRoja, franjaCian, vineta, scanlines);
 
-        // Parpadeo sutil (flicker), como un monitor viejo con el brillo inestable
         Timeline parpadeo = new Timeline(
                 new KeyFrame(Duration.seconds(0.0), e -> scanlines.setOpacity(1.0)),
                 new KeyFrame(Duration.seconds(0.08), e -> scanlines.setOpacity(0.85)),
@@ -89,7 +87,6 @@ public class EfectosVisuales {
 
     // ==================== EFECTO HOLOGRÁFICO (por carta) ====================
 
-    // 3 "cuadros" del gradiente arcoíris; van rotando en un Timeline para simular el brillo en movimiento
     @SuppressWarnings("unchecked")
     private static final List<Stop>[] CUADROS_ARCOIRIS = new List[]{
             List.of(
@@ -115,10 +112,6 @@ public class EfectosVisuales {
             )
     };
 
-    /**
-     * Aplica el brillo holográfico animado a una carta. ancho/alto deben ser
-     * los mismos que fitWidth/fitHeight que le pusiste al ImageView.
-     */
     public static void aplicarHolografico(ImageView vista, double ancho, double alto) {
         Blend blend = new Blend(BlendMode.COLOR_DODGE);
         blend.setTopInput(crearCapaArcoiris(ancho, alto, 0));
@@ -137,5 +130,39 @@ public class EfectosVisuales {
     private static ColorInput crearCapaArcoiris(double ancho, double alto, int indiceCuadro) {
         LinearGradient gradiente = new LinearGradient(0, 0, 1, 1, true, CycleMethod.REPEAT, CUADROS_ARCOIRIS[indiceCuadro]);
         return new ColorInput(0, 0, ancho, alto, gradiente);
+    }
+
+    // ==================== EFECTO CURVATURA (perspectiva tipo Balatro) ====================
+
+    /**
+     * Aplica efecto de curvatura/perspectiva a un panel, como en Balatro.
+     * Simula que la pantalla está curvada hacia el observador con sombra MUY pronunciada.
+     */
+    public static void aplicarCurvatura(Pane panel) {
+        DropShadow sombra = new DropShadow();
+        sombra.setRadius(80);
+        sombra.setOffsetX(0);
+        sombra.setOffsetY(50);
+        sombra.setSpread(0.5);
+        sombra.setColor(Color.color(0, 0, 0, 1.0));
+        panel.setEffect(sombra);
+
+        panel.setScaleX(0.85);
+        panel.setScaleY(0.80);
+    }
+
+    // ==================== EFECTO CLARIDAD SUPER FUERTE ====================
+
+    /**
+     * Aumenta DRÁSTICAMENTE el contraste y brillo para que todo sea luminoso.
+     */
+    public static void aplicarClaridad(Parent root) {
+        if (root == null) return;
+
+        ColorAdjust claridad = new ColorAdjust();
+        claridad.setContrast(0.70);
+        claridad.setBrightness(0.35);
+        claridad.setSaturation(0.40);
+        root.setEffect(claridad);
     }
 }
