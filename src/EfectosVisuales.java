@@ -20,16 +20,16 @@ import java.util.List;
 
 /**
  * Efectos visuales reutilizables:
- *  - CRT: overlay tipo pantalla retro (scanlines + viñeta) para toda la pantalla.
- *  - Holográfico: brillo arcoíris animado tipo carta "foil" de Balatro, por carta.
- *  - Curvatura: efecto 3D tipo Balatro con sombra pronunciada.
+ *  - CRT: overlay tipo pantalla retro.
+ *  - Holográfico: brillo arcoíris animado tipo carta "foil".
+ *  - Curvatura: efecto 3D con sombra.
  *  - Claridad: aumenta contraste y brillo para mejor visibilidad.
  */
 public class EfectosVisuales {
 
     // ==================== EFECTO CRT (global, por pantalla) ====================
 
-    /** Aplica el efecto CRT a la raíz de una escena. Se llama una vez por Scene. */
+    /** Aplica el efecto CRT a la raíz de una escena. Se llama una vez por escena.*/
     public static void aplicarCRT(Parent root) {
         if (!(root instanceof Pane)) return;
         Pane panel = (Pane) root;
@@ -135,8 +135,8 @@ public class EfectosVisuales {
     // ==================== EFECTO CURVATURA (perspectiva tipo Balatro) ====================
 
     /**
-     * Aplica efecto de curvatura/perspectiva a un panel, como en Balatro.
-     * Simula que la pantalla está curvada hacia el observador con sombra MUY pronunciada.
+     * Aplica efecto de curvatura a un panel.
+     * Simula que la pantalla está curvada hacia el observador con sombra.
      */
     public static void aplicarCurvatura(Pane panel) {
         DropShadow sombra = new DropShadow();
@@ -154,7 +154,7 @@ public class EfectosVisuales {
     // ==================== EFECTO CLARIDAD SUPER FUERTE ====================
 
     /**
-     * Aumenta DRÁSTICAMENTE el contraste y brillo para que todo sea luminoso.
+     * Aumenta el contraste y brillo para que todo sea luminoso.
      */
     public static void aplicarClaridad(Parent root) {
         if (root == null) return;

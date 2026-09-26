@@ -49,7 +49,7 @@ public class Tienda {
             Carta[] mano = jugador.getManoActual();
             for (Carta c : mano) {
                 if (c != null && barajaExtra != null) {
-                    // Clon real (antes se insertaba la misma referencia dos veces)
+                    // Clone de la carta
                     Carta clon = new Carta(c.getNombre(), c.getPalo(), c.getValorNumerico(), c.isComunitaria());
                     clon.setHolografica(true); // las cartas duplicadas por este comodín quedan holográficas para siempre
 

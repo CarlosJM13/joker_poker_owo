@@ -21,10 +21,9 @@ public class PantallaMejora {
     private Runnable onMejoraCompleta;
     private Label lblContador; // Para mostrar cuántas mejoras llevas aplicadas
 
-    // Esta compra de $2 (comodín 4 / "Evolucionar cartas") da 2 usos, y cada
-    // uso se asigna a UNA carta con SU propio camino: por ejemplo, 1 carta
+    // Esta compra de $2 da 2 usos, y cada uso se asigna a una carta con su propio camino: por ejemplo, 1 carta
     // para mejora azul y otra distinta para mejora roja, en vez de forzar
-    // el mismo camino a las 2 cartas como antes.
+    // el mismo camino a las 2 cartas.
     private static final int USOS_TOTALES = 3;
     private int usosRestantes = USOS_TOTALES;
 
@@ -70,7 +69,7 @@ public class PantallaMejora {
             System.out.println(carta.getNombre() + " ya está en el nivel máximo.");
         }
 
-        // Deja la carta marcada como "ya usada" en esta visita y libera la selección
+        // Deja la carta marcada como ya usada en esta visita y libera la selección
         VBox caja = cajasPorCarta.get(carta);
         if (caja != null) {
             caja.setStyle("-fx-border-color: " + (esIzquierda ? "#1e4c7a" : "#7a1e1e") + "; -fx-border-width: 3; -fx-border-radius: 5; -fx-padding: 5; -fx-opacity: 0.5;");
@@ -111,7 +110,7 @@ public class PantallaMejora {
             root.setStyle("-fx-background-color: #1a1a1a;");
         }
 
-        // 2. Contenedor del Pergamino con Sombra 3D
+        // 2. Contenedor del pergamino con Sombra 3D
         VBox panelPergamino = new VBox(20);
         panelPergamino.setAlignment(Pos.CENTER);
         panelPergamino.setMaxWidth(880);
@@ -269,7 +268,7 @@ public class PantallaMejora {
     private HBox crearBotonMejora(String titulo, String colorFondoHex) {
         HBox boton = new HBox();
         boton.setAlignment(Pos.CENTER);
-        // Usamos boton_borde.png de fondo, pero le ponemos un color de fondo semitransparente para diferenciar azul/rojo
+        // Usamos la imagen borde.boton de fondo, pero le ponemos un color de fondo semitransparente para diferenciar azul y rojo
         boton.setStyle(
                 "-fx-background-image: url('/assets/fondo/boton_borde.png');" +
                         "-fx-background-size: stretch;" +

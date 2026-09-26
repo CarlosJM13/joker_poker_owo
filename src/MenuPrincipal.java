@@ -75,7 +75,7 @@ public class MenuPrincipal {
         root.getChildren().add(panelPergamino);
     }
 
-    // Nuevo método generador de botones con gradientes de madera y oro
+    // Nuevo método generador de botones de madera y oro
     private Button crearBotonPremium(String texto) {
         Button boton = new Button(texto);
         boton.setFont(Font.font("Georgia", FontWeight.BOLD, 16));

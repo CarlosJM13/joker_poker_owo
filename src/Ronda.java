@@ -332,7 +332,6 @@ public class Ronda {
                 partida.getMesaComun().add(barajaCompartida.remove(0));
             }
         }
-
         // Cuando ya están las 5 cartas comunitarias sobre la mesa, las ordenamos
         // de menor a mayor (Selection Sort) para que los jugadores identifiquen
         // más fácil escaleras, pares, tríos, etc. y decidan si usar sus jokers.
@@ -411,7 +410,7 @@ public class Ronda {
         titulo.setTextFill(Color.web("#a42a2a"));
         titulo.setEffect(new DropShadow(2, Color.web("#ffffff")));
 
-        int delayAnimacion = 0; // Aquí llevaremos la cuenta de TODAS las cartas de la pantalla
+        int delayAnimacion = 0; // Aquí llevaremos la cuenta de todas las cartas de la pantalla
 
         VBox seccionCentral = new VBox(10);
         seccionCentral.setAlignment(Pos.CENTER);

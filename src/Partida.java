@@ -4,7 +4,6 @@ import java.util.List;
 /**
  * Contenedor de todo el estado que varias escenas necesitan leer y
  * modificar durante una partida. NO es una escena JavaFX.
- *
  * Nota sobre el Joker comunal: es un comodín que el jugador SIEMPRE
  * tiene puesto por default (no se compra en la tienda). Cada vez que se
  * gana una ronda jefe (las rondas múltiplo de 3, las que traen un
@@ -22,8 +21,8 @@ import java.util.List;
  */
 public class Partida {
 
-    // --- Debuffs de rondas especiales (múltiplo de 3), como constantes para
-    // poder compararlos por nombre en Ronda.java sin usar texto suelto ---
+    // Debuffs de rondas especiales, como constantes para
+    // poder compararlos por nombre en Ronda.java sin usar texto suelto
     public static final String DEBUFF_COLOR_MITAD = "Color vale la mitad de puntos";
     public static final String DEBUFF_FULLHOUSE_MITAD = "Full House vale la mitad de puntos";
     public static final String DEBUFF_PAR_INHABILITADO = "Par está inhabilitado";
@@ -35,7 +34,7 @@ public class Partida {
     private int numeroRonda;
     private int metaFichas;
 
-    // TODO: idealmente el mazo completo (52+ cartas) también sería una
+    // TODO: idealmente el mazo completo también sería una
     // estructura propia tuya en vez de ArrayList; no me compartiste una
     // clase de "baraja completa" así que la dejo como List<Carta>. Lo que
     // SÍ ya usa tu estructura real es el "catálogo de 3 para escoger" de

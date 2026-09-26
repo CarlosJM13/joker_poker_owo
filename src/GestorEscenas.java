@@ -14,7 +14,7 @@ public class GestorEscenas {
     }
 
     public void mostrar(Scene scene) {
-        // 1. Preparamos el efecto de Fade-In (Transición de cine)
+        // 1. Preparamos el efecto de transicion
         javafx.scene.Parent root = scene.getRoot();
         root.setOpacity(0); // Inicia invisible
 
@@ -28,7 +28,6 @@ public class GestorEscenas {
         // 2. Mostramos la escena
         stage.setScene(scene);
     }
-    // ----------------------------------------------
 
     public void mostrarMenuPrincipal() {
         MenuPrincipal menu = new MenuPrincipal(this);
@@ -68,11 +67,11 @@ public class GestorEscenas {
     }
 
     public void mostrarTienda() {
-        // Delegado a la llamada estática de Ronda.java
+        // Delegado a la llamada estática de la clase ronda.java
     }
 
     public void mostrarHistorial() {
-        // Si la partida es null (no se ha jugado nada), creamos una ListaDoble vacía para que no truene
+        // Si la partida todavia no se juega nada, creamos una ListaDoble vacía para que no truene
         ListaDoble datosHistorial;
         if (partida != null && partida.getHistorialRondas() != null) {
             datosHistorial = partida.getHistorialRondas();
@@ -80,7 +79,7 @@ public class GestorEscenas {
             datosHistorial = new ListaDoble();
         }
 
-        // Nota el orden: primero la ListaDoble, luego el gestor (así lo pide tu HistorialPartidas)
+        // Nota el orden: primero la ListaDoble, luego el gestor
         HistorialPartidas historial = new HistorialPartidas(datosHistorial, this);
         mostrar(new Scene(historial.getRoot(), 1024, 768));
     }

@@ -16,7 +16,7 @@ public class CargadorImagenes {
         }
 
         if (is == null) {
-            // Intento de seguridad para .jpeg (como tus 2P.jpeg, 10T.jpeg, etc.)
+            // Intento de seguridad para .jpeg
             is = CargadorImagenes.class.getResourceAsStream("/assets/cartas/" + nombreArchivo + ".jpeg");
         }
 
@@ -33,9 +33,6 @@ public class CargadorImagenes {
      * marcada como holográfica (ver Carta.setHolografica), le aplica el
      * brillo arcoíris animado. Llama a esto en vez de setImage(cargarCarta(...))
      * en cualquier lugar donde se dibuje una carta en pantalla.
-     *
-     * IMPORTANTE: llama a este método DESPUÉS de setFitWidth/setFitHeight
-     * en el ImageView, para que el holograma use el tamaño real de la carta.
      */
     public static void cargarCartaEnVista(ImageView vista, Carta carta) {
         if (carta == null) return;
@@ -75,8 +72,6 @@ public class CargadorImagenes {
     }
 
     public static Image cargarJoker(String tipo) {
-        // OJO: antes faltaba la subcarpeta "/jokers/" en las 3 rutas, así
-        // que getResourceAsStream siempre regresaba null y esto tronaba.
         if (tipo.equalsIgnoreCase("rojo")) {
             return new Image(CargadorImagenes.class.getResourceAsStream("/assets/jokers/JokerCartasR.png"));
         } else if (tipo.equalsIgnoreCase("negro")) {

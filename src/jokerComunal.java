@@ -3,7 +3,7 @@ public class jokerComunal {
     private int puntos = 0;
 
     // Tope de puntos: con 4 puntos ya llegamos a repetir la mano 5 veces
-    // (el máximo pedido), así que no tiene caso seguir sumando después.
+    // así que no tiene caso seguir sumando después.
     private static final int PUNTOS_MAXIMOS = 4;
 
     public void sumarPunto() {
