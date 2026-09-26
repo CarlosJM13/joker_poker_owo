@@ -91,7 +91,7 @@ public class Tienda {
         Partida partida = gestor.getPartida();
         Jugador jugador = numJugador == 1 ? partida.getJugador1() : partida.getJugador2();
 
-        int costo = 2; // precio? >:)
+        int costo = 3; // precio? >:)
         if (jugador.getDolares() >= costo) {
             jugador.setDolares(jugador.getDolares() - costo);
 
